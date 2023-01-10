@@ -40,6 +40,17 @@
                 </table>                
               </div></span>
 </form>
+<b>Refresh:</b>Refresh active targets. 
+<td>
+  <form class="navbar-form" action="vd-in-targets" method="post" style="display: inline;">
+    {%csrf_token%}
+  <input type="hidden" name="target_action" value="discover">
+                <button type="submit" class="btn btn-white btn-round btn-just-icon" rel="tooltip" title="" data-original-title="Refresh active assets">
+                  <i class="material-icons">refresh status</i>
+                <div class="ripple-container"></div>
+              </button> 
+  </form>
+</td>
 <b>Merge:</b>Append new objects. <b>Delete:</b> Removes matching objects. <b>Sync:</b>Flush Orphans and append new assets by TAG.
 <form class="navbar-form" action="vd-export" method="post" style="display: inline;">
 	{%csrf_token%}

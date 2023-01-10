@@ -6,6 +6,12 @@ import re, json
 from cProfile import label
 from app.tools import autodetectType, delta, debug, get_metadata, PARSER_DEBUG
 from app.nmapmodels import NMAP_PORTS, NMHost, NMService
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+consoleHandler = logging.StreamHandler()
+logger.addHandler(consoleHandler)
 
 class Command(BaseCommand):
     help = 'Processes the input for Worker Scans'
@@ -52,7 +58,7 @@ class Command(BaseCommand):
                     MSG = Host.getList()
                     MSG.update(MDT)
                     MSG["message"] = "[NMAP][New Host Found]"
-                    delta(MSG)
+                    # delta(MSG)
                     #One Alert for each service
                     for service in Host.services:
                         MSG = service.getList()
@@ -61,7 +67,7 @@ class Command(BaseCommand):
                         MSG['hostnname'] = Host.nname
                         MSG['ipv4'] = Host.ipv4
                         MSG['message'] = "[NMAP][New Service Found]"
-                        delta(MSG)
+                        # delta(MSG)
                 
                 if not NewData:
                     debug("Searching:"+Host.name)
@@ -86,7 +92,7 @@ class Command(BaseCommand):
                             MSG['hostname'] = Host.name
                             MSG['hostnname'] = Host.nname
                             MSG['ipv4'] = Host.ipv4
-                            delta(MSG)
+                            # delta(MSG)
                     #Compare Old data with New
                     for service in OldHost.services:
                         Match = False
@@ -101,9 +107,9 @@ class Command(BaseCommand):
                             MSG['hostname'] = Host.name
                             MSG['hostnname'] = Host.nname
                             MSG['ipv4'] = Host.ipv4
-                            delta(MSG)
+                            # delta(MSG)
 
-                    OldData.update(info = report_content, nname=Host.nname, ipv4=Host.ipv4, ports = Host.full_ports, full_ports = Host.full_ports, info_gnmap = Host.line, owner = MDT['owner'], tag = MDT['tags'], metadata = MDATA)
+                    OldData.update(info = report_content, nname=Host.nname, ipv4=Host.ipv4, ports = Host.full_ports, full_ports = Host.full_ports, info_gnmap = Host.line, owner = MDT['owner'], tag = '' if 'tags' not in MDT else MDT['tags'], metadata = MDATA)
                     debug("\n\n#########Updating....#################\n")
             debug(line)
             lines +=1

@@ -186,7 +186,16 @@ function search_msf_module(SuchForm){
 	<td colspan="6">
 <ul>
 {% for report  in item.reports %}
-<li style="display:inline;"><a href="{{ report.file }}" target="_blank">{{ report.name }}</a></li>&nbsp;&nbsp;&nbsp;
+<!-- <li style="display:inline;"><a href="{{ report.file }}" target="_blank">{{ report.name }}</a></li>&nbsp;&nbsp;&nbsp; -->
+<form class="navbar-form" action="vd-redteam" method="post" style="display: inline;">
+  {%csrf_token%}
+        <input type="hidden" name='report_file' value="{{ report.file }}" class="form-control">
+        <input type="hidden" name='job_id' value="{{ item.id }}" class="form-control">
+  <input type="hidden" name="job_action" value="report_file">
+        <button type="submit" class="btn btn-white btn-round btn-just-icon"  rel="tooltip" title={{ report.file }} data-original-title="Read report">
+        <i class="material-icons">assignment</i>
+        </button>
+</form>
 {% endfor %}
 </ul>
 	</td>
@@ -290,6 +299,19 @@ Repeat (0=no):<select name="repeat">
               </div>
             </div>
 </div>
+
+{% if file_content %}
+<!-- <tr id="file_content_report" style="display: block;"> -->
+<div class="card" data-color="black" data-background-color="white">
+	<td colspan="4">
+    <pre style="white-space: pre-wrap;">
+      <!-- {{ file_content | linebreaks }} -->
+      {{ file_content | linebreaks | pprint }} 
+    </pre>
+  </td>
+</div>
+<!-- </tr> -->
+{% endif %}
 
 {% endblock content %}
 

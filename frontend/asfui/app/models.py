@@ -78,6 +78,11 @@ class vdNucleiResult(models.Model):
     scope = models.CharField(max_length=1, default='E')
     engine = models.CharField(max_length=50, default="network")
     level = models.CharField(max_length=20, default="critical")
+    # status open, closed, hold
+    status = models.CharField(max_length=20, default="open")
+    # test id that would uniquely identify the alert/result TODO: rename this model to alertResult
+    alert_test_id = models.CharField(max_length=512, default="")
+    alert_sub_test_id = models.CharField(max_length=512, default="")
     uri = models.CharField(max_length=250)
     full_uri = models.TextField()
     uriistruncated = models.IntegerField(default=0)
@@ -89,7 +94,7 @@ class vdNucleiResult(models.Model):
     owner = models.CharField(max_length=512, default='')
     metadata = models.TextField(default="")
     class Meta:
-        unique_together = ('vulnerability','name')
+        unique_together = ('name', 'alert_test_id', 'alert_sub_test_id', 'engine')
     
     def __str__(self):
         return self.name.lower()

@@ -35,20 +35,35 @@ Nmap waiting
 <!--                 <input type="text" name='target_domain' value="amass enum -df domains.txt" class="form-control" placeholder="New Target exampledomain.com">
  -->                
  {% if running %}
- <input type="hidden" name="nmap_action" value="stop">
+ <td>
+  <form class="navbar-form" action="vd-in-portscan" method="post">
+    {%csrf_token%}
+ <input type="hidden" name="nmap_action" value="refresh">
+ <button type="submit" class="btn btn-white btn-round btn-just-icon"  rel="tooltip" title="" data-original-title="Refresh">
+   <i class="material-icons">refresh status</i>
+   <div class="ripple-container"></div>
+ </button>
+ </form>
+</td>
+<td>
+  <form class="navbar-form" action="vd-in-portscan" method="post">
+    {%csrf_token%}
+    <input type="hidden" name="nmap_action" value="stop">
                 <button type="submit" class="btn btn-white btn-round btn-just-icon"  rel="tooltip" title="" data-original-title="Stop">
                   <i class="material-icons">stop</i>
                   <div class="ripple-container"></div>
                 </button>
+  </form>
+</td>
   {% else %}
  <input type="hidden" name="nmap_action" value="start">
                 <button type="submit" class="btn btn-white btn-round btn-just-icon" rel="tooltip" title="" data-original-title="Start">
                   <i class="material-icons">play_arrow</i>
                   <div class="ripple-container"></div>
                 </button> 
+              </form>
  {% endif %}
               </div></span>
-</form>
 </td>
 <td>
  <form class="navbar-form" action="vd-export" method="post" style="display: inline;">

@@ -1,8 +1,9 @@
 #!/bin/bash
 OUTPUT_FOLDER="/home/nmap/reports"
 INPUT_FOLDER="/home/nmap"
-cd /opt/asf/frontend/asfui
-. bin/activate
+INSTALLED_PATH =/opt/asf
+cd $INSTALLED_PATH/frontend/asfui
+# . bin/activate
 python3 manage.py nmap_input --input targets --output "$INPUT_FOLDER/targets.txt"
 python3 manage.py nmap_input --input amass --output "$INPUT_FOLDER/targets_amass.txt"
 if ! test -e "$INPUT_FOLDER/targets.txt" || ! test -e "$INPUT_FOLDER/targets_amass.txt"
@@ -49,8 +50,8 @@ cat "$INPUT_FOLDER/targets.txt.unique" | while read H
     WFILE="/tmp/$DELTAD.madnmap/worker_$WORKER.sh"
     #echo "echo Scanning host $H Thread:$WORKER; timeout -k $ABORTTM $TIMEOUT nmap -p- -Pn -T4 --open --reason -oA $OUTPUT_FOLDER/$DELTAD/Worker_$WORKER.$JOBID.txt -sC $H >> $OUTPUT_FOLDER/$DELTAD/Worker_$WORKER.log" >> "$WFILE"
     echo "echo Scanning host $H Thread:$WORKER; timeout -k $ABORTTM $TIMEOUT nmap --top-ports 200 -sC -sV -Pn -T4 --open --reason -oA $OUTPUT_FOLDER/$DELTAD/Worker_$WORKER.$JOBID.txt -sC $H >> $OUTPUT_FOLDER/$DELTAD/Worker_$WORKER.log" >> "$WFILE"
-    echo "cd /opt/asf/frontend/asfui" >> "$WFILE"
-    echo ". bin/activate" >> "$WFILE"
+    echo "cd '$INSTALLED_PATH/frontend/asfui'" >> "$WFILE"
+    # echo ". bin/activate" >> "$WFILE"
 	echo "python3 manage.py nmapparse --input $OUTPUT_FOLDER/$DELTAD/Worker_$WORKER.$JOBID.txt --host $H --destination external" >> "$WFILE"
     if test "$WORKER" -ge "$WORKERS"
 	then WORKER=1

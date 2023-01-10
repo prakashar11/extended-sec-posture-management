@@ -16,6 +16,13 @@ import json
 from urllib.request import localhost
 from app.tools import *
 from app.nuclei import *
+import logging
+from json import loads, JSONDecodeError
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+consoleHandler = logging.StreamHandler()
+logger.addHandler(consoleHandler)
 
 #Static and Global Declarations
 HYDRA = re.compile("^(\[.*\])(\[.*\])\s+host:\s+([a-z,0-9,A-Z,\.]*)\s+login:\s+(\S*)\s+password:\s+(.*)$")
@@ -134,6 +141,97 @@ def parser_hydra_telnet(PARSER_INPUT, PARSER_OUTPUT):
                 NEWMETADATA=json.dumps(OLDMDT.update(MDT))                
                 OldData.update(service_telnet="Telnet BruteForce:{"+DATA[2]+":"+DATA[3]+":"+DATA[4]+")", owner=MDT['owner'], metadata=NEWMETADATA)
     return
+
+def parser_nuclei_http_store(PARSER_INPUT, PARSER_OUTPUT):
+    logger.debug(f"parser nuclei http store {PARSER_INPUT} {PARSER_OUTPUT}")
+    DETECTOR_IPADDRESS = re.compile("(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})")
+    DETECTOR_DOMAIN = re.compile("(?!\-)(?:[a-zA-Z\d\-]{0,62}[a-zA-Z\d]\.){1,126}(?!\d+)[a-zA-Z\d]{1,63}")
+    scope="E"
+    # note template value is in template:sub_template format
+    host_template_list = {}
+    if PARSER_OUTPUT.__name__ =='vdInServices':
+        scope="I"
+        logger.debug(f"set scope to {scope}")
+    for line in PARSER_INPUT:
+        # json input 
+        if 'template-id' not in line:
+            # no need parse
+            continue
+        logger.debug(f"parsing line {line}")
+        # also save in vulnerability model
+        tz = timezone.get_current_timezone()
+        # logger.debug(f"type of Nfinding: {type(Nfinding)}")
+        # reference: https://github.com/hive-nuclei/hive-nuclei/hive_nuclei/__init__.py
+        json_line = loads(line)
+        level = None
+        description = ''
+        tag = 'Default'
+        reference = 'Default'
+        alert_sub_test_id = '' if 'matcher-name' not in json_line else json_line['matcher-name']
+        host = json_line['host']
+        # DATA = host.split("://")[1]
+        # host = DATA.split("/")[0]
+        # host = host.split(":")[0]
+        if 'info' in json_line:
+            level = 'medium' if 'severity' not in json_line['info'] else json_line['info']['severity']
+            description = json_line['info']['name'] if 'description' not in json_line['info'] else json_line['info']['name'] + json_line['info']['description']
+            tag = 'Default' if 'tags' not in json_line['info'] else json_line['info']['tags']
+            if 'referece' in json_line['info']:
+                # reference could be null
+                if json_line['info']['reference']:
+                    reference = json_line['info']['reference']
+            # reference = reference if 'reference' not in json_line['info'] else json_line['info']['reference']
+        # if Nfinding:
+        #     Nfinding = vdNucleiResult(bumpdate=datetime.now().replace(tzinfo=tz))
+        #     Nfinding.save()
+
+        count = 0
+        # check whether there is an existing alert/sub-alert for the given host
+        if alert_sub_test_id:
+            count = vdNucleiResult.objects.filter(name=host, alert_test_id=json_line['template-id'], alert_sub_test_id=alert_sub_test_id).count()
+        else:
+            count = vdNucleiResult.objects.filter(name=host, alert_test_id=json_line['template-id']).count()
+
+        # creating alert finding for the first time
+        if count < 1:
+            if alert_sub_test_id:
+                Nfinding = vdNucleiResult(name=host, firstdate=datetime.now().replace(tzinfo=tz), vulnerability=description, engine='Nuclei', level=level, type=autodetectType(host), bumpdate=datetime.now().replace(tzinfo=tz), detectiondate=datetime.now().replace(tzinfo=tz), scope=scope, status="open", metadata=reference, alert_test_id=json_line['template-id'], alert_sub_test_id=alert_sub_test_id)
+            else:
+                Nfinding = vdNucleiResult(name=host, firstdate=datetime.now().replace(tzinfo=tz), vulnerability=description, engine='Nuclei', level=level, type=autodetectType(host), bumpdate=datetime.now().replace(tzinfo=tz), detectiondate=datetime.now().replace(tzinfo=tz), scope=scope, status="open", metadata=reference, alert_test_id=json_line['template-id'])
+            Nfinding.save()
+        
+        # check whether for the received alert id there is a closed finding
+        # check whether there is an existing alert/sub-alert for the given host
+        # may be the case of reopening the finding
+        Nfinding = vdNucleiResult.objects.filter(name=host,alert_test_id=json_line['template-id'], alert_sub_test_id=alert_sub_test_id, status='closed')
+        for finding in Nfinding:
+            finding.status = 'open'
+            finding.detectiondate=datetime.now().replace(tzinfo=tz)
+            finding.bumpdate=datetime.now().replace(tzinfo=tz)
+            finding.save()
+
+        # store the alert test case/sub test case ids for the given host so that same can be
+        # used to determine whether alert findings to be closed
+        temp_entry=f"{json_line['template-id']}:{alert_sub_test_id}"
+        if host not in host_template_list:
+            host_template_list[host] = {'template': []}
+        host_template_list[host]['template'].append(temp_entry)
+
+    # determine whether alert findings to be closed
+    # key is host
+    for key in host_template_list:
+        logger.debug(f"processing {key} for closing alert finding")
+        for finding in vdNucleiResult.objects.filter(name=key):
+            if not finding.alert_test_id:
+                continue
+            alert_searched=f"{finding.alert_test_id}:{finding.alert_sub_test_id}"
+            logger.debug(f"alert being searched {alert_searched} in {host_template_list[key]['template']}")
+            if alert_searched not in host_template_list[key]['template']:
+                finding.status = 'closed' 
+                finding.bumpdate = datetime.now().replace(tzinfo=tz)
+                finding.save()
+    return
+
 
 def parser_nuclei_http(PARSER_INPUT, PARSER_OUTPUT):
     #Although you can import them from VIEWS, in this particular case, we need to match all over the string,
@@ -367,7 +465,7 @@ def parser_nuclei_onlyalert(PARSER_INPUT, PARSER_OUTPUT):
 
 
 #Here is the global declaration of parsers, functions can be duplicated
-action={'default':parser_default, 'patator.ssh':parser_patator_ssh, 'patator.rdp':parser_patator_rdp, 'patator.ftp':parser_patator_ftp, 'patator.telnet':parser_patator_telnet, 'hydra.ftp':parser_hydra_ftp, 'hydra.telnet':parser_hydra_telnet, 'nuclei.http':parser_nuclei_http, 'nuclei.network':parser_nuclei_network, 'nuclei':parser_nuclei, 'nuclei.onlyalert':parser_nuclei_onlyalert, 'nuclei.waf':parser_nuclei_waf}
+action={'default':parser_default, 'patator.ssh':parser_patator_ssh, 'patator.rdp':parser_patator_rdp, 'patator.ftp':parser_patator_ftp, 'patator.telnet':parser_patator_telnet, 'hydra.ftp':parser_hydra_ftp, 'hydra.telnet':parser_hydra_telnet, 'nuclei.http':parser_nuclei_http, 'nuclei.network':parser_nuclei_network, 'nuclei':parser_nuclei, 'nuclei.onlyalert':parser_nuclei_onlyalert, 'nuclei.waf':parser_nuclei_waf, 'nuclei.http.store': parser_nuclei_http_store}
 
 def parseLines(PARSER_INPUT, JobInput, parser):
     if JobInput == "inservices":

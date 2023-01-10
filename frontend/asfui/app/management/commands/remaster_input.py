@@ -17,6 +17,12 @@ from urllib.request import localhost
 from app.tools import *
 from app.search import *
 from app.nmapmodels import NMService, NMHost
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+consoleHandler = logging.StreamHandler()
+logger.addHandler(consoleHandler)
 
 #Static and Global Declarations
 def parser_default(host):
@@ -154,6 +160,7 @@ class Command(BaseCommand):
                 JOB_FILENAME = JOB_FOLDER+"app.asf"
                 try:
                     Job = vdJob.objects.filter(id = JobID)[0]
+                    logger.debug(f"job details from model {Job.regexp} {Job.input}, {Job.exclude}")
                     HostsFromModel = search(Job.regexp, Job.input, Job.exclude)
                     if not path.exists(JOB_FOLDER):
                         os.makedirs(JOB_FOLDER)

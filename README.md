@@ -1,4 +1,5 @@
-# Attack Surface Framework 
+# XSPM Extended Attach Surface based Security Posture Management
+# (Updated Attack Surface Framework)
 
 ## Overview
 
@@ -12,56 +13,22 @@ ASF is a breed of open source projects leveraging a powerful arsenal of tools wr
 
 ![Architecture](images/architecture.png)
 
-### Prerequisites
+## Supported deployment models 
 
-Latest version of Kali Linux (tested on 64 bits) - https://kali.org/get-kali/
+Supports 2 deployment models - docker and Kali linux.
 
-Latest version of Subfinder installed, for instructions see https://github.com/projectdiscovery/subfinder
+### Using docker
 
-16 GB of RAM at least
+1. Clone repo
+2. dc-build.sh - builds the image
+3. dc-compose up - starts the container
+4. http://127.0.0.1:8080
+5. Note: default superuser created with admin credentials; needs change 
 
-1 TB HD - XFS filesystem recommended
+Note: this is the dev Django webserver based deployment; nginx and gunicorn are yet to be enabled. Also shares same unix socket as that of host. Graylog is not used for storing logs and alerts.
 
-### Build & Run
 
-As root
-
-1. `git clone https://github.com/vmware-labs/attack-surface-framework.git /opt/asf`
-2. `cd /opt/asf/`
-3. Run `./setup.sh`
-4. Assign youruser, email and yourpass
-
-Once the installation is completed
-
-5. `cd /opt/asf/frontend/asfui/`
-6. `. bin/activate`
-7. `python3 manage.py runserver 0.0.0.0:8080` - We recommend to run it on a screen session to leave server persistent (`screen -S asf`)
-
-### Security
-
-ASF is not meant to be publicly exposed, assuming you install it on a cloud provider or even on a local instance, we recommend to access it using port forwarding through SSH, here is an example:
-
-`ssh -i "key.pem" -L 8080:127.0.0.1:8080 user@yourhost` - For ASF GUI
-
-`ssh -i "key.pem" -L 9045:127.0.0.1:9045 user@yourhost` - To access Graylog2 Panel
-
-Then open your browser and go to: 
-
-`http://127.0.0.1:8080` - For ASF - user:youruser pass:yourpass (provided in initial setup)
-
-`https://127.0.0.1:9045` - For Graylog2 - user:admin pass:admin #Change it in /graylog/docker-compose.yaml
-
-Graylog2 requires a few steps to start receiving logs from ASF: 
-
-Once logged in, go to System/"Content Packs" and import the Content Pack located at /opt/asf/tools/graylog/content_pack_ASF.json, click on the "Upload" button and you should see "Basic" reflected in the "Select Content Packs" section, click on "Basic", make sure the "ASF" radio button is selected and hit the "Apply content" button, this will create the Global input to parse JSON logs and related extractors. 
-
-![Graylog2 Inputs Example](images/Graylog_content_pack.jpg)
-
-Now you are ready to receive logs from ASF and setup your streams / alerts / dasboards ! 
-
-More info @ https://docs.graylog.org/en/4.1/ 
-
-### Documentation
+## Operations
 
 ASF has two scopes:
 
@@ -87,16 +54,71 @@ A.4 Redteam - Module that runs submodules located in "/opt/asf/redteam"
 
 ![Redteam](images/Redteam.jpg)
 
-Note: For the Internal scope, the flow goes through A.1(Targets),A.3(Enumeration) and A.4(Redteam). 
+### For Internal Targets: Step followed
 
-### Contributing
+1. Internal-> Targets: search for wildcard/IP/CIDR; refresh active targets
+2. Port scan/enumeration; setup regex if required
+3. Red team - Input to select 'internal enumeration' and select module & save job
+4. Start job
+5. Alerts generated from the assessment; organized based on assessment id specific to a tool
+
+### Using Kali linux
+
+Latest version of Kali Linux (tested on 64 bits) - https://kali.org/get-kali/
+
+Latest version of Subfinder installed, for instructions see https://github.com/projectdiscovery/subfinder
+
+16 GB of RAM at least
+
+1 TB HD - XFS filesystem recommended
+
+Build & Run
+
+As root
+
+1. `git clone https://github.com/vmware-labs/attack-surface-framework.git /opt/asf`
+2. `cd /opt/asf/`
+3. Run `./setup.sh`
+4. Assign youruser, email and yourpass
+
+Once the installation is completed
+
+5. `cd /opt/asf/frontend/asfui/`
+6. `. bin/activate`
+7. `python3 manage.py runserver 0.0.0.0:8080` - We recommend to run it on a screen session to leave server persistent (`screen -S asf`)
+
+Security
+
+ASF is not meant to be publicly exposed, assuming you install it on a cloud provider or even on a local instance, we recommend to access it using port forwarding through SSH, here is an example:
+
+`ssh -i "key.pem" -L 8080:127.0.0.1:8080 user@yourhost` - For ASF GUI
+
+`ssh -i "key.pem" -L 9045:127.0.0.1:9045 user@yourhost` - To access Graylog2 Panel
+
+Then open your browser and go to: 
+
+`http://127.0.0.1:8080` - For ASF - user:youruser pass:yourpass (provided in initial setup)
+
+`https://127.0.0.1:9045` - For Graylog2 - user:admin pass:admin #Change it in /graylog/docker-compose.yaml
+
+Graylog2 requires a few steps to start receiving logs from ASF: 
+
+Once logged in, go to System/"Content Packs" and import the Content Pack located at /opt/asf/tools/graylog/content_pack_ASF.json, click on the "Upload" button and you should see "Basic" reflected in the "Select Content Packs" section, click on "Basic", make sure the "ASF" radio button is selected and hit the "Apply content" button, this will create the Global input to parse JSON logs and related extractors. 
+
+![Graylog2 Inputs Example](images/Graylog_content_pack.jpg)
+
+Now you are ready to receive logs from ASF and setup your streams / alerts / dasboards ! 
+
+More info @ https://docs.graylog.org/en/4.1/ 
+
+## Contributing
 
 The attack-surface-framework project team welcomes contributions from the community. Before you start working with attack-surface-framework, please
 read our [Developer Certificate of Origin](https://cla.vmware.com/dco). All contributions to this repository must be
 signed as described on that page. Your signature certifies that you wrote the patch or have the right to pass it on
 as an open-source patch. For more detailed information, refer to [CONTRIBUTING.md](CONTRIBUTING.md).
 
-### License
+## License
 
 Attack Surface Framework
 Copyright 2021 VMware, Inc.

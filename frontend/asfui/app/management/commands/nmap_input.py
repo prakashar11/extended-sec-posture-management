@@ -8,6 +8,12 @@ import os
 import netaddr
 from cProfile import label
 from app.tools import autodetectType
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+consoleHandler = logging.StreamHandler()
+logger.addHandler(consoleHandler)
 
 PARSER_DEBUG=False
 def debug(text):
@@ -52,11 +58,13 @@ class Command(BaseCommand):
             Targets=vdTarget.objects.all()
         for target in Targets:
             TYPE = autodetectType(target.name)
-            if TYPE == "CIDR":
-                debug("Exploding CIDR:"+str(target)+"\n")
-                for ip in netaddr.IPNetwork(target.name):
-                    debug(str(ip)+" ")
-                    PARSER_OUTPUT.write(str(ip)+"\n")
+            if TYPE == "CIDR" or TYPE == "WILDCARD":
+                # don't write wild card or CIDR range to target as it is already expanded & scopped
+                continue
+                # debug("Exploding CIDR:"+str(target)+"\n")
+                # for ip in netaddr.IPNetwork(target.name):
+                #     debug(str(ip)+" ")
+                #     PARSER_OUTPUT.write(str(ip)+"\n")
             else:
                 debug(target.name+" ")
                 PARSER_OUTPUT.write(target.name+"\n")

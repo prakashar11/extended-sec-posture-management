@@ -15,6 +15,7 @@ PARSER_DEBUG=True
 DETECTOR_IPADDRESS = re.compile("^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$")
 DETECTOR_IPADDRESS_IN_URI = re.compile("\:\/\/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*")
 DETECTOR_CIDR = re.compile("^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\/\d{1,2}$")
+DETECTOR_WILDCARD = re.compile("^\d{1,3}\.\d{1,3}\.\d{1,3}\.(\*)$")
 DETECTOR_SHA256 = re.compile("^[A-Fa-f0-9]{64}$")
 DETECTOR_MD5 = re.compile("^[A-Fa-f0-9]{32}$")
 #DETECTOR_DOMAIN = re.compile("^[a-z0-9]([a-z0-9-]+\.){1,}[a-z0-9]+\Z")
@@ -51,6 +52,8 @@ def autodetectType(IOC):
         return "FILE_HASH"
     if DETECTOR_EMAIL.match(IOC):
         return "EMAIL"
+    if DETECTOR_WILDCARD.match(IOC):
+        return "WILDCARD"
     return "Unknown"
 
 def get_metadata(id,scope='internal'):
@@ -68,33 +71,33 @@ def get_metadata(id,scope='internal'):
         return METADATA, json.dumps(METADATA)
 
 def delta(info):
-    JOURNAL_DIR = "/home/asf/alerts/journal/"
-    QUEUE_DIR = "/home/asf/alerts/queue/"
-    LOGS_DIR = "/home/asf/alerts/logs/"
-    DIRS = [JOURNAL_DIR, QUEUE_DIR, LOGS_DIR]
-    ensure_dirs(DIRS)
-    #Adding timestamp
-    dt = datetime.now()
-    info['timestamp']=str(dt.timestamp())
-    info['datestamp']=str(dt)
-    info['year'] = str(dt.year)
-    info['month'] = str(dt.month)
-    info['day'] = str(dt.day)
-    info['hour'] = str(dt.hour)
-    info['minute'] = str(dt.minute)
-    info['second'] = str(dt.second)
-    #Creating a Hash fom info, this will be the file name in the Journal while it's weitten
-    INFO_HASH = hashlib.sha256(str(info).encode('utf-8')).hexdigest()
-    FILE_IN_JOURNAL = JOURNAL_DIR+INFO_HASH
-    FIN = open(FILE_IN_JOURNAL, "w+")
-    json_info=json.dumps(info)
-    FIN.write(json_info)
-    #Required new line for using basic shell monitor (CAT does not print new lines if not exist)
-    FIN.write("\n")
-    FIN.close()
-    #File is written, now will be moved to queue
-    shutil.move(FILE_IN_JOURNAL, QUEUE_DIR+INFO_HASH)
-    debug("Created new alert in queue:"+INFO_HASH+":"+str(info)+":"+json_info+"\n")
+    # JOURNAL_DIR = "/home/asf/alerts/journal/"
+    # QUEUE_DIR = "/home/asf/alerts/queue/"
+    # LOGS_DIR = "/home/asf/alerts/logs/"
+    # DIRS = [JOURNAL_DIR, QUEUE_DIR, LOGS_DIR]
+    # ensure_dirs(DIRS)
+    # #Adding timestamp
+    # dt = datetime.now()
+    # info['timestamp']=str(dt.timestamp())
+    # info['datestamp']=str(dt)
+    # info['year'] = str(dt.year)
+    # info['month'] = str(dt.month)
+    # info['day'] = str(dt.day)
+    # info['hour'] = str(dt.hour)
+    # info['minute'] = str(dt.minute)
+    # info['second'] = str(dt.second)
+    # #Creating a Hash fom info, this will be the file name in the Journal while it's weitten
+    # INFO_HASH = hashlib.sha256(str(info).encode('utf-8')).hexdigest()
+    # FILE_IN_JOURNAL = JOURNAL_DIR+INFO_HASH
+    # FIN = open(FILE_IN_JOURNAL, "w+")
+    # json_info=json.dumps(info)
+    # FIN.write(json_info)
+    # #Required new line for using basic shell monitor (CAT does not print new lines if not exist)
+    # FIN.write("\n")
+    # FIN.close()
+    # #File is written, now will be moved to queue
+    # shutil.move(FILE_IN_JOURNAL, QUEUE_DIR+INFO_HASH)
+    # debug("Created new alert in queue:"+INFO_HASH+":"+str(info)+":"+json_info+"\n")
     return True
 
 def ensure_dirs(DIR_PATHS):

@@ -29,8 +29,22 @@ from app.metasploitbr import *
 from app.targets import *
 from app.nuclei import *
 from app.discovery import *
+import logging
+from xml.etree import ElementTree as ET
+from django.utils import timezone
 
 GENERAL_PAGE_SIZE = 50
+
+BASE_DIR    = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+TOOL_SCRIPT_DIR = os.path.join(BASE_DIR, "tools/")
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+consoleHandler = logging.StreamHandler()
+logger.addHandler(consoleHandler)
+
+class NmapExecutionError(Exception):
+    """Exception raised when en error occurred during nmap call"""
 
 def pager(context, page, page_size, count):
     if page<0:
@@ -84,20 +98,94 @@ def nuclei(request):
     page = 0
     page_size = GENERAL_PAGE_SIZE
     if 'page' in request.POST:
-        page = int(request.POST['page'])
-        
-    if 'domain_search' in request.POST:
-        DomainRegexpFilter=request.POST['domain_search']
-        context['domain_search'] = DomainRegexpFilter
-        #context['query_results'] = vdResult.objects.filter(name__regex=DomainRegexpFilter)
-        context['query_results'] = search(DomainRegexpFilter, 'nuclei')
-        filters,context['query_results'] = nuclei_filter(request.POST,context['query_results'])
-        context.update(filters)
-                
+        # page = int(request.POST['page'])
+        page_payload = request.POST['page']
+        page = int(page_payload.split(',')[0])
+        severity_search = page_payload.split(',')[1]
+        status_search = page_payload.split(',')[2]
+        logger.debug(f"page handling value page:{page}, severity:{severity_search}, status:{status_search}")
+        if severity_search and status_search:
+            context['query_results'] = vdNucleiResult.objects.filter(level=severity_search, status=status_search)
+        elif severity_search and not status_search:
+            context['query_results'] = vdNucleiResult.objects.filter(level=severity_search)
+        elif not severity_search and status_search:
+            context['query_results'] = vdNucleiResult.objects.filter(status=status_search)
+        else:
+            context['query_results'] = vdNucleiResult.objects.all()
         context['query_count'] = context['query_results'].count()
-        #context['query_count'] = len(context['query_results'])
+        context['severity_search'] = severity_search
+        context['status_search'] = status_search
         slicer = pager(context, page, page_size, context['query_count'])
         context['query_results'] = context['query_results'][slicer]
+        context['nuclei_selector']=mark_safe(get_nuclei_ptime_selector(request.POST))
+        context['nuclei_filter_hidden']=mark_safe(get_nuclei_filter_hidden(request.POST))
+        html_template = loader.get_template( 'vd-nuclei.html' )
+        return HttpResponse(html_template.render(context, request)) 
+
+
+    # if 'domain_search' in request.POST:
+    #     DomainRegexpFilter=request.POST['domain_search']
+    #     context['domain_search'] = DomainRegexpFilter
+    #     #context['query_results'] = vdResult.objects.filter(name__regex=DomainRegexpFilter)
+    #     context['query_results'] = search(DomainRegexpFilter, 'nuclei')
+    #     filters,context['query_results'] = nuclei_filter(request.POST,context['query_results'])
+    #     context.update(filters)
+                
+    #     context['query_count'] = context['query_results'].count()
+    #     #context['query_count'] = len(context['query_results'])
+    #     slicer = pager(context, page, page_size, context['query_count'])
+    #     context['query_results'] = context['query_results'][slicer]
+    if 'severity_search' in request.POST or 'status_search' in request.POST or 'text_search' in request.POST:
+        logger.debug(f"search POST {request.POST}")
+        status_search = request.POST['status_search']
+        severity_search = request.POST['severity_search']
+        text_search = request.POST['text_search']
+        # logger.debug(f"severity_search value {severity_search}")
+        # logger.debug(f"status_search value {status_search}")
+        if severity_search and status_search and text_search:
+            # context['query_results'] = vdNucleiResult.objects.filter(level=severity_search, status=status_search)
+            partial = vdNucleiResult.objects.filter(level=severity_search, status=status_search, name__regex=text_search)
+            partial = partial | vdNucleiResult.objects.filter(level=severity_search, status=status_search, full_uri__icontains=text_search)
+            result = partial | vdNucleiResult.objects.filter(level=severity_search, status=status_search, vulnerability__icontains=text_search)
+            context['query_results'] = result
+        elif severity_search and not status_search and not text_search:
+            context['query_results'] = vdNucleiResult.objects.filter(level=severity_search)
+        elif not severity_search and status_search and not text_search:
+            context['query_results'] = vdNucleiResult.objects.filter(status=status_search)
+        elif not severity_search and not status_search and text_search:
+            partial = vdNucleiResult.objects.filter(name__regex=text_search)
+            partial = partial | vdNucleiResult.objects.filter(full_uri__icontains=text_search)
+            result = partial | vdNucleiResult.objects.filter(vulnerability__icontains=text_search)
+            context['query_results'] = result
+        elif severity_search and not status_search and text_search:
+            partial = vdNucleiResult.objects.filter(level=severity_search, name__regex=text_search)
+            partial = partial | vdNucleiResult.objects.filter(level=severity_search, full_uri__icontains=text_search)
+            result = partial | vdNucleiResult.objects.filter(level=severity_search, vulnerability__icontains=text_search)
+            context['query_results'] = result
+        elif not severity_search and status_search and text_search:
+            partial = vdNucleiResult.objects.filter(status=status_search, name__regex=text_search)
+            partial = partial | vdNucleiResult.objects.filter(status=status_search, full_uri__icontains=text_search)
+            result = partial | vdNucleiResult.objects.filter(status=status_search, vulnerability__icontains=text_search)
+            context['query_results'] = result
+        elif severity_search and status_search and not text_search:
+            context['query_results'] = vdNucleiResult.objects.filter(level=severity_search, status=status_search)
+        else:
+            context['query_results'] = vdNucleiResult.objects.all()
+        context['query_count'] = context['query_results'].count()
+        context['severity_search'] = severity_search
+        context['status_search'] = status_search
+        context['text_search'] = text_search
+        slicer = pager(context, page, page_size, context['query_count'])
+        context['query_results'] = context['query_results'][slicer]
+    # elif 'status_search' in request.POST:
+    #     logger.debug(f"status_search POST {request.POST}")
+    #     status_search = request.POST['status_search']
+    #     logger.debug(f"status_search value {status_search}")
+    #     if status_search:
+    #         context['query_results'] = vdNucleiResult.objects.filter(status=status_search)
+    #     else:
+    #         context['query_results'] = vdNucleiResult.objects.all()
+    #     context['query_count'] = context['query_results'].count()
     else:
         context['query_results'] = vdNucleiResult.objects.all()
         filters,context['query_results'] = nuclei_filter(request.POST,context['query_results'])
@@ -233,9 +321,62 @@ def intargets(request):
 #Delete a target
     def target_delete():
         target_delete_model(vdInTarget,vdInServices,request,context,autodetectType,delta)
+
+    def target_discover():
+        # referce: https://github.com/nmmapper/python3-nmap/nmap3/nmapparser.py
+        logger.debug("active target refresh")
+        Targets = vdInTarget.objects.all()
+        timeout = None
+        output = None
+        for target in Targets:
+            # do this only for taget with wild card; no need to delete that target, but has to be skipped while
+            # getting the target list
+            logger.debug(f"processing target to make sure it is active {target.name}")
+            # if autodetectType(target.name) == 'WILDCARD' or autodetectType(target.name) == 'CIDR':
+            cmd = f"nmap -sn -T4 -oX - {target.name}"
+            # discover hosts that are up if CIDR range or wild card is input as target
+            sub_proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            try:
+                output, errs = sub_proc.communicate(timeout=timeout)
+            except Exception as e:
+                sub_proc.kill()
+                raise (e)
+            else:
+                if 0 != sub_proc.returncode:
+                    raise NmapExecutionError('Error during command: "' + ' '.join(cmd) + '"\n\n' + errs.decode('utf8'))
+                if output:
+                    # logger.debug(f"output from nmap scan {output}")
+                    xmlroot = ET.fromstring(output.decode('utf8').strip())
+                    scanned_host = xmlroot.findall("host")
+                    for hosts in scanned_host:
+                        address = hosts.find("address").get("addr")
+                        Type = autodetectType(address)
+                        logger.debug(f"host address {address} type {Type}")
+                        metadata = {}
+                        metadata['owner']="Admin from UI"
+                        Jmetadata = json.dumps(metadata)
+                        # update Tag with hostnames
+                        Tag = "Default"
+                        hostnames = hosts.findall("hostnames/hostname")
+                        hostnames_list = []
+                        for host in hostnames:
+                            if 'name' in host.attrib:
+                                hostnames_list.append(host.attrib['name'])
+                        if hostnames_list:
+                            Tag = ';'.join(hostnames_list)
+                        tz = timezone.get_current_timezone()
+                        LastDate = datetime.now().replace(tzinfo=tz)
+                        # update target
+                        try:
+                            vdInTarget.objects.update_or_create(name=address, defaults={'type': Type, 'tag':Tag, 'lastdate': LastDate, 'owner': metadata['owner'], 'metadata': Jmetadata})
+                            logger.debug(f"completed vdInTarget update for {address} {Tag}")
+                        except:
+                            logger.debug("vdTarget model update failed")
+                else:
+                    logger.debug("error in getting output")
         
 #Same dirty solution 
-    action={'new':target_new, 'delete':target_delete}
+    action={'new':target_new, 'delete':target_delete, 'discover': target_discover}
     if 'target_action' in request.POST:
         if request.POST['target_action'] in action:
             action[request.POST['target_action']]()
@@ -418,7 +559,10 @@ def portscan(request):
         
 #start Nmap
     def nmap_start():
-        subprocess.Popen(["nohup", "/opt/asf/tools/nmap/nmap.sh"])
+        # subprocess.Popen(["nohup", "/opt/asf/tools/nmap/nmap.sh"])
+        nmap_path = os.path.join(TOOL_SCRIPT_DIR, 'nmap/nmap.sh')
+        logger.debug(f"nmap path {nmap_path}")
+        subprocess.Popen(["/bin/bash", nmap_path])
         context['running'] = True
 
 #stop Nmap
@@ -551,10 +695,19 @@ def inportscan(request):
 #             FileTargets.write(target.name+"\n")
 #         sys.stdout.write("Staring Nmap for Internal Networks")
 #         FileTargets.close()
-        subprocess.Popen(["nohup", "/opt/asf/tools/nmap/nmap.int.sh"])
+        #subprocess.Popen(["nohup", "/opt/asf/tools/nmap/nmap.int.sh"])
+        nmap_path = os.path.join(TOOL_SCRIPT_DIR, 'nmap/nmap.int.sh')
+        logger.debug(f"nmap path {nmap_path}")
+        subprocess.Popen(["/bin/bash", nmap_path])
         #os.system("nohup /opt/asf/tools/nmap/nmap.sh")
         context['running'] = True
 
+# refresh nmap scan status
+    def nmap_refresh():
+        if path.isfile("/home/nmap.int/reports/nmap.lock"):
+            context['running'] = True
+        else:
+            context['running'] = False
 #stop Nmap
     def nmap_stop():
         sys.stdout.write("Stopping Nmap for Internal Networks")
@@ -616,18 +769,20 @@ def inportscan(request):
         return
     
 #Same dirty solution
-    action={'start':nmap_start, 'stop':nmap_stop, 'save_regexp':nmap_save_regexp, 'delete_regexp':nmap_delete_regexp, 'delete':nmap_delete, 'schedule': nmap_schedule}
+    action={'start':nmap_start, 'stop':nmap_stop, 'save_regexp':nmap_save_regexp, 'delete_regexp':nmap_delete_regexp, 'delete':nmap_delete, 'schedule': nmap_schedule, 'refresh': nmap_refresh}
+    logger.debug(f"request received {request.POST}")
     if 'nmap_action' in request.POST:
         if request.POST['nmap_action'] in action:
-            action[request.POST['nmap_action']]()   
+            action[request.POST['nmap_action']]()
     context['query_results'] = host_picture(context['query_results'])
     #Here we add data from the previous system timer, and pass it to the view via context dictionary
     InNmap = sdService({"name":"vdinnmap"})
     InNmap.read()
     InNmap.setContext(context)
-    
+    logger.debug(f"context {context} for action {request.POST}")
     html_template = loader.get_template( 'vd-in-portscan.html' )
     return HttpResponse(html_template.render(context, request))
+    #return HttpResponseRedirect(html_template.render(context, request))
 
 @login_required(login_url="/login/")
 def redteam(request):
@@ -683,7 +838,8 @@ def redteam(request):
                         #sys.stderr.write(inode+"\n")
                         for pattern in REPORT_REGEXP:
                             for recursive_inode in pathlib.Path(JOB_FOLDER+inode).glob(pattern):
-                                FCOMP = "/static/jobs/"+str(Job.id)+"/"+inode+"/"+str(recursive_inode).rsplit("/"+inode+"/", 4)[1]
+                                FCOMP = "jobs/"+str(Job.id)+"/"+inode+"/"+str(recursive_inode).rsplit("/"+inode+"/", 4)[1]
+                                # FCOMP = "/static/jobs/"+str(Job.id)+"/"+inode+"/"+str(recursive_inode).rsplit("/"+inode+"/", 4)[1]
                                 EXCLUDE_FLAG = False
                                 for EXCLUDE in REPORT_EXCLUDE:
                                     if EXCLUDE in FCOMP:
@@ -756,9 +912,13 @@ def redteam(request):
             job_input = request.POST['job_input']
         else:
             job_input = "Unknown"
-        job_regexp = "Not Found"
-        job_exclude = "Error"
-        job_info = "Not Found"       
+        # job_regexp = "Not Found"
+        # job_exclude = "Error"
+        # job_info = "Not Found"
+        # setting default regexp to get all details
+        job_regexp = ".*"
+        job_exclude = ""
+        job_info = "Default"
         try:
             jre = request.POST['job_regexp']
             qre = vdRegExp.objects.filter(id = jre).first()
@@ -766,9 +926,10 @@ def redteam(request):
             job_exclude = qre.exclude
             job_info = qre.info
         except:
-            job_regexp = "Not Found"
-            job_exclude = "Error"
-            job_info = "Error on searching RegExp Module"
+            pass
+            # job_regexp = "Not Found"
+            # job_exclude = "Error"
+            # job_info = "Error on searching RegExp Module"
             
         job_module = request.POST['job_module']
         try:
@@ -795,13 +956,16 @@ def redteam(request):
         return False
     
     def job_start():
+        logger.debug(f"inside red team job_start")
         if 'job_id' in request.POST:
             job_id = request.POST['job_id']
+            logger.debug(f"with job_start job id {job_id}")
             Job = vdJob.objects.filter(id = job_id)[0]
             JOB_FOLDER = "/home/asf/jobs/"+str(job_id)+"/"
             ensure_dirs(JOB_FOLDER)
             ensure_dirs("/home/asf/hosts/")
             MODULE_FOLDER = "/opt/asf/redteam/"+Job.module+"/"
+            logger.debug(f"module folder {MODULE_FOLDER}")
             try:
                 if not path.exists("/opt/asf/frontend/asfui/core/static/jobs"):
                     os.symlink("/home/asf/jobs","/opt/asf/frontend/asfui/core/static/jobs")
@@ -813,7 +977,8 @@ def redteam(request):
 #                     lockfile = open(JOB_FOLDER+".lock","w+")
 #                     lockfile.write(job_id)
 #                     lockfile.close()
-                    subprocess.Popen(["nohup", MODULE_FOLDER+"start",str(job_id)], cwd=JOB_FOLDER)
+                    # subprocess.Popen(["nohup", MODULE_FOLDER+"start",str(job_id)], cwd=JOB_FOLDER)
+                    subprocess.Popen(["/bin/bash", MODULE_FOLDER+"start",str(job_id)], cwd=JOB_FOLDER)
                     #Out of scope - do not try 
                     #context['running_jobs'][job_id] = True
                     time.sleep(5)
@@ -904,19 +1069,49 @@ def redteam(request):
                  EL.append(line.rstrip())
         return EL
 
+    def return_report_file():
+        logger.debug("return_report file")
+        if 'report_file' in request.POST:
+            if 'job_id' in request.POST:
+                job_id = request.POST['job_id']
+                logger.debug(f"with job_start job id {job_id}")
+                Job = vdJob.objects.filter(id = job_id)[0]
+                JOB_FOLDER = "/home/asf/"
+                ensure_dirs(JOB_FOLDER)
+                report_name = JOB_FOLDER + request.POST['report_file']
+                logger.debug(f"return_report fiile {report_name}")
+                f = open(report_name, 'r')
+                file_content = f.read()
+                f.close()
+                # return HttpResponse(file_content, content_type="text/plain")
+                # logger.debug(f"file content {file_content}")
+                return file_content
+
+    logger.debug(f"inside vd-redteam request {request.POST}")
+    file_content_read = None
     action={'create':job_create, 'delete':job_delete, 'start':job_start, 'stop':job_stop, 'save_cmdargs':job_save_cmdargs, 'schedule':job_schedule, 'msf_save':metasploit_save_args}
     if 'job_action' in request.POST:
         if request.POST['job_action'] in action:
             action[request.POST['job_action']]()   
+        elif 'report_file'in request.POST['job_action']: 
+            file_content_read = return_report_file ()
 
     context['saved_regexp'] = vdRegExp.objects.all()
     context['jobs'] = vdJob.objects.all()
     context['running_jobs'] = detect_running_jobs(context['jobs'])
     context['jobs'] = retrieve_metadata(context['jobs'])
+    logger.debug(f"jobs metadata {context['jobs']}")
+    logger.debug(f"running jobs {context['running_jobs']}")
+    # logger.debug(f"file content {file_content_read}")
     context['modules'] = detect_modules()
     context['msf_modules'] = metasploit_read_modules()
+    if file_content_read:
+        context['file_content'] = file_content_read
     
     html_template = loader.get_template( 'vd-redteam.html' )
+    # if file_content_read:
+    #     return HttpResponse(html_template.render(context, request, content_type="application/json"))
+    # else:
     return HttpResponse(html_template.render(context, request))
     
 @login_required(login_url="/login/")

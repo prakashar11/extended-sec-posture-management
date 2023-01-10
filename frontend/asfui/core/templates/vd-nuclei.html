@@ -18,7 +18,43 @@
   background-color: orange;
 }
 </style>
-<b>Nuclei Findings:</b>Single domain, multiple urls allowed
+<tr>
+  <!-- <span class="bmd-form-group"><div class="input-group no-border">
+    <td>
+  <form method="post" action="vd-nuclei" style="display: inline;">
+    {%csrf_token%}
+      <input type="text" name='severity_search' value="{{ severity_search }}" class="form-control" placeholder="Search severity..">
+  {{ nuclei_filter_hidden }}
+  <button type="submit" rel="tooltip" title="" class="btn btn-white btn-round btn-just-icon" data-original-title="Search by severity">
+        <i class="material-icons" style="display: inline;">search</i>
+      </button></td>
+    </form></td>
+    <td>
+    <form method="post" action="vd-nuclei" style="display: inline;">
+      {%csrf_token%}
+      <input type="text" name='status_search' value="{{ status_search }}" class="form-control" placeholder="Search status...">
+      {{ nuclei_filter_hidden }}
+      <button type="submit" rel="tooltip" title="" class="btn btn-white btn-round btn-just-icon" data-original-title="Search by status">
+            <i class="material-icons" style="display: inline;">search</i>
+          </button>
+        </form></td>
+    </div></span>
+</tr> -->
+<form class="navbar-form" action="vd-nuclei" method="post" style="display: inline;">
+  {%csrf_token%}
+        <span class="bmd-form-group"><div class="input-group no-border">
+        Severity: &nbsp;  &nbsp;  &nbsp;<input type="text" name='severity_search' value="{{ severity_search }}" class="form-control" placeholder="Severity search">
+        Status:  &nbsp;  &nbsp;  &nbsp;<input type="text" name='status_search' value="{{ status_search }}" class="form-control" placeholder="Status search">
+        Text Search: &nbsp;  &nbsp;  &nbsp;<input type="text" name='text_search', value="{{ text_search }}" class="form-control" placeholder="Free-form text search">
+        <button type="submit" class="btn btn-white btn-round btn-just-icon" rel="tooltip" title="Search" data-original-title="Search">
+        <i class="material-icons">search</i>
+        <div class="ripple-container"></div>
+        </button>
+        </div></span>
+</form>
+</tr>
+<!-- Pager  -->
+<!-- <b>Nuclei Findings:</b>Single domain, multiple urls allowed
 <form class="navbar-form" action="vd-export" method="post" style="display: inline;">
 	{%csrf_token%}
           <span class="bmd-form-group"><div class="input-group no-border">
@@ -28,12 +64,11 @@
           <div class="ripple-container"></div>
           </button>
           </div></span>
-</form>
-<!-- Pager  -->
+</form> -->
  <table width="100%">
  <tr>
  <td>
-<form class="navbar-form" action="vd-nuclei" method="post">
+<!-- <form class="navbar-form" action="vd-nuclei" method="post">
  			{%csrf_token%}
              <span class="bmd-form-group"><div class="input-group no-border">
              <input type="text" name='domain_search' value="{{ domain_search }}" class="form-control" placeholder="New Regex query">
@@ -54,7 +89,7 @@
              <div class="ripple-container"></div>
              </button>
              </div></span>
-</form>
+</form> -->
  </td>
   <td align="center">
  Objects: [{{ query_count }}]
@@ -127,10 +162,12 @@
 <form class="navbar-form" action="vd-nuclei" method="post">
  			{%csrf_token%}
              <span class="bmd-form-group"><div class="input-group no-border">
-             <input type="hidden" name='domain_search' value="{{ domain_search }}">
-			 <input type="hidden" name="nuclei_action" value="filter">
+             <!-- <input type="hidden" name='domain_search' value="{{ domain_search }}"> -->
+			 <!-- <input type="hidden" name="nuclei_action" value="filter"> -->
 			{{ nuclei_filter_hidden }}
-			 <input type="hidden" name="page" value="{{ query_page_next }}">
+			 <input type="hidden" name="page" value="{{ query_page_next }},{{ severity_search }},{{ status_search }}">
+       <!-- <input type="hidden" name="page" value="{{ severity_search }}">
+       <input type="hidden" name="page" value="{{ status_search }}"> -->
              <button type="submit" class="btn btn-white btn-round btn-just-icon" rel="tooltip" title="" data-original-title="Next Page">
              <i class="material-icons">skip_next</i>
              <div class="ripple-container"></div>
@@ -146,12 +183,12 @@
             <div class="col-md-12">
               <div class="card">
                 <div class="card-header card-header-primary">
-                  <h4 class="card-title ">Targets List</h4>
+                  <h4 class="card-title ">Assessment Alerts</h4>
                 </div>
                 <div class="card-body">
                   <div class="table-responsive">
                     <table class="table">
-                      <thead class="text-primary">
+                      <!-- <thead class="text-primary">
                         <th>
                           Id
                         </th>
@@ -185,6 +222,41 @@
                         <th style="text-align: center;">
                           Tools
                         </th>
+                      </thead> -->
+                      <thead class="text-primary">
+                        <th>
+                          Id
+                        </th>
+                        <th>
+                          Assessment Id
+                        </th>
+                        <th>
+                          Domain/Host
+                        </th>                        
+                        <th>
+                          Finding
+                        </th>
+                        <th>
+                          Severity
+                        </th>
+                        <!-- <th>
+                          Tag
+                        </th> -->
+                        <th>
+                          Initial Discovery
+                        </th>
+                        <!-- <th>
+                          Last Presence
+                        </th>
+                        <th>
+                          Realert Date
+                        </th> -->
+                        <!-- <th>
+                          Metadata
+                        </th>
+                        <th style="text-align: center;">
+                          Tools
+                        </th> -->
                       </thead>
                       <tbody>
  {% for item in query_results %}
@@ -192,27 +264,30 @@
                           <td  class="tfp{{ item.tfp }}">
                             {{ item.id }}
                           </td>
+                          <td onclick="row = document.getElementById('metadata-{{ item.id }}');if (row.style.display=='none') {row.style.display='';}else{row.style.display='none';}">
+                            {{ item.alert_test_id }}
+                          </td>
                           <td>
                             {{ item.name }}
                           </td>
-                          <td onclick="row = document.getElementById('metadata-{{ item.id }}'); if (row.style.display=='none') {row.style.display='';}else{row.style.display='none';}">
+                          <!-- <td onclick="row = document.getElementById('metadata-{{ item.id }}'); if (row.style.display=='none') {row.style.display='';}else{row.style.display='none';}">
                             {{ item.uri|truncatechars:128  }} [{{ item.uriistruncated }}]
-                          </td>
+                          </td> -->
                           <td>
                             {{ item.vulnerability }}
                           </td>
                           <td><div class="tfp{{ item.tfp }}">
                             {{ item.level }}
                             </div></td>
-                          <td>
+                          <!-- <td>
                             {{ item.tag }}
-                          </td>
+                          </td> -->
                           <td>
                             {{ item.detectiondate }}
                           </td>
-                          <td>
+                          <!-- <td>
                             {{ item.lastdate }}
-                          </td>                          
+                          </td>                           -->
                           <td class="text-primary">
                           <div rel="tooltip" title="" data-original-title="{{ item.bumpdate }}">{{ item.ptime }}
 							<form method="post" action="vd-nuclei" style="display: inline;">
@@ -284,9 +359,10 @@
                         <tr>
                         <td colspan=10 id="metadata-{{ item.id }}" style="display: none;">
                         <span onclick="row = document.getElementById('metadata-{{ item.id }}'); if (row.style.display=='none') {row.style.display='';}else{row.style.display='none';}" style="overflow-wrap: anywhere">
-                        {{ item.metadata }}<br>
-                        {{ item.full_uri }}<br>
-                        {{ item.info }}<br>
+                        Metadata: {{ item.metadata }}<br>
+                        Sub Assessment Id: {{ item.alert_sub_test_id }}<br>
+                        Tools engine: {{ item.engine }}<br>
+                        Alert status: {{ item.status }}<br>
                         </span>
                         </td>
                         </tr>
@@ -337,18 +413,20 @@
  Page [{{ query_page }}]
 </td>
 <td>
-<form class="navbar-form" action="vd-nuclei" method="post">
- 			{%csrf_token%}
-             <span class="bmd-form-group"><div class="input-group no-border">
-             <input type="hidden" name='domain_search' value="{{ domain_search }}">
-			 <input type="hidden" name="nuclei_action" value="filter">
-			{{ nuclei_filter_hidden }}
-			 <input type="hidden" name="page" value="{{ query_page_next }}">
-             <button type="submit" class="btn btn-white btn-round btn-just-icon" rel="tooltip" title="" data-original-title="Next Page">
-             <i class="material-icons">skip_next</i>
-             <div class="ripple-container"></div>
-             </button>
-             </div></span>
+  <form class="navbar-form" action="vd-nuclei" method="post">
+    {%csrf_token%}
+          <span class="bmd-form-group"><div class="input-group no-border">
+          <!-- <input type="hidden" name='domain_search' value="{{ domain_search }}"> -->
+    <!-- <input type="hidden" name="nuclei_action" value="filter"> -->
+   {{ nuclei_filter_hidden }}
+    <input type="hidden" name="page" value="{{ query_page_next }},{{ severity_search }},{{ status_search }}">
+    <!-- <input type="hidden" name="page" value="{{ severity_search }}">
+    <input type="hidden" name="page" value="{{ status_search }}"> -->
+          <button type="submit" class="btn btn-white btn-round btn-just-icon" rel="tooltip" title="" data-original-title="Next Page">
+          <i class="material-icons">skip_next</i>
+          <div class="ripple-container"></div>
+          </button>
+          </div></span>
 </form>
 </td>
 </tr>
