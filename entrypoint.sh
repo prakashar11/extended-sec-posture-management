@@ -6,7 +6,7 @@
 # . bin/activate
 cd frontend/asfui
 # copy static files - required first time
-python3 manage.py collectstatic # https://docs.djangoproject.com/en/3.1/howto/static-files/
+python3 manage.py collectstatic --noinput # https://docs.djangoproject.com/en/3.1/howto/static-files/
 python3 manage.py makemigrations
 python3 manage.py migrate
 #python3 manage.py createsuperuser
