@@ -38,7 +38,8 @@ then
 fi
 . /opt/asf/tools/scripts/arguments nuclei $1
 DATE_STAMP=`date +"%Y%m%d%H%M%S"`
-JOB_FOLDERS="/home/asf/jobs"
+JOB_FOLDERS="/opt/asf/jobs"
+#JOB_FOLDERS="/home/asf/jobs"
 JOB_FOLDER="$JOB_FOLDERS/$1"
 JOB_OUTPUT_FOLDER="$JOB_FOLDER/$DATE_STAMP"
 TERM="xterm"
@@ -141,13 +142,15 @@ else
     echo docker run --rm -v $JOB_OUTPUT_FOLDER/:/mnt -v /home/nuclei-templates:/app/nuclei-templates $IMAGE_NAME -t /app/nuclei-templates/ -no-color $ARG0 -l /mnt/app.input $ARG1 $ARG2  2>&1 \| tee "$JOB_OUTPUT_FOLDER/app.report.txt" \>\> "$JOB_OUTPUT_FOLDER/app.log" \&
     # docker run --rm -v /home/asf/jobs/2/20221230201914/:/mnt/ -v /home/nuclei-templates:/app/nuclei-templates projectdiscovery/nuclei -no-color -u http://192.168.1.135
     # docker run --rm -v $JOB_OUTPUT_FOLDER/:/mnt -v /home/nuclei-templates:/app/nuclei-templates $IMAGE_NAME -t /app/nuclei-templates/ -no-color $ARG0 -l /mnt/app.input $ARG1 $ARG2  2>&1 | tee "$JOB_OUTPUT_FOLDER/app.report.txt" >> "$JOB_OUTPUT_FOLDER/app.log" &
-    docker run --rm -v $JOB_OUTPUT_FOLDER/:/mnt $IMAGE_NAME -no-color $ARG0 -l /mnt/app.input -json $ARG1 $ARG2  2>&1 | tee "$JOB_OUTPUT_FOLDER/app.report.txt" >> "$JOB_OUTPUT_FOLDER/app.log" &
-    # for json output
     # docker run --rm -v $JOB_OUTPUT_FOLDER/:/mnt $IMAGE_NAME -no-color $ARG0 -l /mnt/app.input -json $ARG1 $ARG2  2>&1 | tee "$JOB_OUTPUT_FOLDER/app.report.txt" >> "$JOB_OUTPUT_FOLDER/app.log" &
+    # cat output of app.input to nuclei, seems to start multiple instances of nuclei and there seems to be an issue in
+    # passing file/folder inside docker to another docker instance
+    # 75 templates executed in parallel
+    docker run --rm -i $IMAGE_NAME -no-color $ARG0 -json -c 75 $ARG1 $ARG2 -<$JOB_OUTPUT_FOLDER/app.input  2>&1 | tee "$JOB_OUTPUT_FOLDER/app.report.txt" >> "$JOB_OUTPUT_FOLDER/app.log" &
 fi
 JOB_PID=$!
 echo $JOB_PID>"$JOB_FOLDER/pid"
-wait $PID
+wait $JOB_PID
 python3 /opt/asf/frontend/asfui/manage.py remaster_output --parser=nuclei.http.store --debug --input="$JOB_OUTPUT_FOLDER/app.log" --output=JobID:$1
 rm -v "$JOB_FOLDER/pid"
 rm -v "$JOB_FOLDER/.lock"

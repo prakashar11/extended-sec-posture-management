@@ -43,8 +43,24 @@
 <form class="navbar-form" action="vd-nuclei" method="post" style="display: inline;">
   {%csrf_token%}
         <span class="bmd-form-group"><div class="input-group no-border">
-        Severity: &nbsp;  &nbsp;  &nbsp;<input type="text" name='severity_search' value="{{ severity_search }}" class="form-control" placeholder="Severity search">
-        Status:  &nbsp;  &nbsp;  &nbsp;<input type="text" name='status_search' value="{{ status_search }}" class="form-control" placeholder="Status search">
+        Severity: &nbsp;  &nbsp;  &nbsp;
+        <!-- <input type="text" name='severity_search' value="{{ severity_search }}" class="form-control" placeholder="Severity search"> -->
+        <select name='severity_search' class="form-control" placeholder="Severity search">
+          <option value=""></option>
+          <option value="critical">&nbsp; &nbsp;Critical</option>
+          <option value="high">&nbsp; &nbsp;High</option>
+          <option value="medium">&nbsp; &nbsp;Medium</option>
+          <option value="low">&nbsp; &nbsp;Low</option>
+          <option value="info">&nbsp; &nbsp;Info</option>
+          </select>
+        <!-- Status:  &nbsp;  &nbsp;  &nbsp;<input type="text" name='status_search' value="{{ status_search }}" class="form-control" placeholder="Status search"> -->
+        Status: &nbsp;  &nbsp;  &nbsp;
+        <select name='status_search' class="form-control"placeholder="Status search" >
+          <option value=""></option>
+          <option value="open"> &nbsp; &nbsp;Open</option>
+          <option value="closed"> &nbsp; &nbsp;Closed</option>
+          <option value="false_positive"> &nbsp; &nbsp;False Positive</option>
+          </select>
         Text Search: &nbsp;  &nbsp;  &nbsp;<input type="text" name='text_search', value="{{ text_search }}" class="form-control" placeholder="Free-form text search">
         <button type="submit" class="btn btn-white btn-round btn-just-icon" rel="tooltip" title="Search" data-original-title="Search">
         <i class="material-icons">search</i>

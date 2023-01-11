@@ -812,7 +812,7 @@ def redteam(request):
         #sys.stderr.write("\n\n\n"+str(JobsArray)+"\n\n\n")
         for Job in JobsArray:
             #sys.stderr.write(str(Job)+"\n\n\n")
-            if path.exists("/home/asf/jobs/"+str(Job.id)+"/.lock"):
+            if path.exists("/opt/asf/jobs/"+str(Job.id)+"/.lock"):
                 RunningJobs[Job.id] = True
         return RunningJobs
     
@@ -823,7 +823,7 @@ def redteam(request):
         REPORT_REGEXP = ["**/*.[tT][xX][tT]", "**/*.[hH][tT][mM][lL]*", "**/*.[cC][sS][vV]", "**/*.[nN][mM][aA][pP]"] 
         REPORT_EXCLUDE = ['slice']
         CMDARG_REGEXP = re.compile("\d+\.cmdarg")
-        JOBS_FOLDER = "/home/asf/jobs/"
+        JOBS_FOLDER = "/opt/asf/jobs/"
         REPORTS = {}
         NEW_JOBS_ARRAY = []
         for Job in JobsArray:
@@ -883,7 +883,7 @@ def redteam(request):
         return NEW_JOBS_ARRAY
 
     def job_save_cmdargs():
-        JOBS_FOLDER = "/home/asf/jobs/"
+        JOBS_FOLDER = "/opt/asf/jobs/"
         if 'job_id' in request.POST:
             job_id = request.POST['job_id']
         else:
@@ -961,16 +961,16 @@ def redteam(request):
             job_id = request.POST['job_id']
             logger.debug(f"with job_start job id {job_id}")
             Job = vdJob.objects.filter(id = job_id)[0]
-            JOB_FOLDER = "/home/asf/jobs/"+str(job_id)+"/"
+            JOB_FOLDER = "/opt/asf/jobs/"+str(job_id)+"/"
             ensure_dirs(JOB_FOLDER)
-            ensure_dirs("/home/asf/hosts/")
+            ensure_dirs("/opt/asf/hosts/")
             MODULE_FOLDER = "/opt/asf/redteam/"+Job.module+"/"
             logger.debug(f"module folder {MODULE_FOLDER}")
             try:
                 if not path.exists("/opt/asf/frontend/asfui/core/static/jobs"):
-                    os.symlink("/home/asf/jobs","/opt/asf/frontend/asfui/core/static/jobs")
+                    os.symlink("/opt/asf/jobs","/opt/asf/frontend/asfui/core/static/jobs")
                 if not path.exists("/opt/asf/frontend/asfui/core/static/hosts"):
-                    os.symlink("/home/asf/hosts","/opt/asf/frontend/asfui/core/static/hosts")
+                    os.symlink("/opt/asf/hosts","/opt/asf/frontend/asfui/core/static/hosts")
 
                 if path.exists(MODULE_FOLDER+"start"):
                     #Lock file has to be created by module, good to remove it on termination or kill
@@ -996,11 +996,11 @@ def redteam(request):
         if 'job_id' in request.POST:
             job_id = request.POST['job_id']
             Job = vdJob.objects.filter(id = job_id)[0]
-            JOB_FOLDER = "/home/asf/jobs/"+str(job_id)+"/"
+            JOB_FOLDER = "/opt/asf/jobs/"+str(job_id)+"/"
             MODULE_FOLDER = "/opt/asf/redteam/"+Job.module+"/"
             try:
                 if not path.exists("/opt/asf/frontend/asfui/core/static/jobs"):
-                    os.symlink("/home/asf/jobs","/opt/asf/frontend/asfui/core/static/jobs")
+                    os.symlink("/opt/asf/jobs","/opt/asf/frontend/asfui/core/static/jobs")
                 if path.exists(MODULE_FOLDER+"stop"):
                     subprocess.Popen(["nohup", MODULE_FOLDER+"stop",str(job_id)], cwd=JOB_FOLDER)
                     #Giving 10 seconds to stop
@@ -1021,15 +1021,15 @@ def redteam(request):
         if 'job_id' in request.POST:
             job_id = request.POST['job_id']
             Job = vdJob.objects.filter(id = job_id)[0]
-            JOB_FOLDER = "/home/asf/jobs/"+str(job_id)+"/"
+            JOB_FOLDER = "/opt/asf/jobs/"+str(job_id)+"/"
             ensure_dirs(JOB_FOLDER)
-            ensure_dirs("/home/asf/hosts/")
+            ensure_dirs("/opt/asf/hosts/")
             MODULE_FOLDER = "/opt/asf/redteam/"+Job.module+"/"
             try:
                 if not path.exists("/opt/asf/frontend/asfui/core/static/jobs"):
-                    os.symlink("/home/asf/jobs","/opt/asf/frontend/asfui/core/static/jobs")
+                    os.symlink("/opt/asf/jobs","/opt/asf/frontend/asfui/core/static/jobs")
                 if not path.exists("/opt/asf/frontend/asfui/core/static/hosts"):
-                    os.symlink("/home/asf/hosts","/opt/asf/frontend/asfui/core/static/hosts")
+                    os.symlink("/opt/asf/hosts","/opt/asf/frontend/asfui/core/static/hosts")
 
                 if path.exists(MODULE_FOLDER+"start"):
                     ExecStart = MODULE_FOLDER+"start "+str(job_id)
@@ -1050,13 +1050,13 @@ def redteam(request):
     def metasploit_save_args():
         if 'job_id' in request.POST:
             job_id = request.POST['job_id']
-            JOB_FOLDER = "/home/asf/jobs/"+str(job_id)+"/"
+            JOB_FOLDER = "/opt/asf/jobs/"+str(job_id)+"/"
             ensure_dirs(JOB_FOLDER)
             return msf_save_args(request)
         return False
 
     def metasploit_read_args(Job):
-        JOB_FOLDER = "/home/asf/jobs/"+str(Job.id)+"/"
+        JOB_FOLDER = "/opt/asf/jobs/"+str(Job.id)+"/"
         ensure_dirs(JOB_FOLDER)
         return msf_read_args(Job)
         
@@ -1076,7 +1076,7 @@ def redteam(request):
                 job_id = request.POST['job_id']
                 logger.debug(f"with job_start job id {job_id}")
                 Job = vdJob.objects.filter(id = job_id)[0]
-                JOB_FOLDER = "/home/asf/"
+                JOB_FOLDER = "/opt/asf/"
                 ensure_dirs(JOB_FOLDER)
                 report_name = JOB_FOLDER + request.POST['report_file']
                 logger.debug(f"return_report fiile {report_name}")
