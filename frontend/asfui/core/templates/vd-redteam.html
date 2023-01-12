@@ -179,8 +179,20 @@ function search_msf_module(SuchForm){
 <i class="material-icons">alarm_add</i>
 </button>
 </span>
-                          </td>
-                        </tr>
+</td>
+</tr>
+{% if item.id in running_jobs %}
+  <td>
+    <form class="navbar-form" action="vd-redteam" method="post">
+      {%csrf_token%}
+    <input type="hidden" name="job_action" value="refresh">
+    <button type="submit" class="btn btn-white btn-round btn-just-icon"  rel="tooltip" title="Status" data-original-title="Refresh">
+      <i class="material-icons">refresh status</i>
+      <div class="ripple-container"></div>
+    </button>
+    </form>
+  </td>
+{% endif %}
 <tr id="job_reports_{{ item.id }}" style="display: none;">
 	<td>.</td>
 	<td colspan="6">

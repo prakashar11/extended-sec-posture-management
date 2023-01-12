@@ -58,13 +58,15 @@ class Command(BaseCommand):
             Targets=vdTarget.objects.all()
         for target in Targets:
             TYPE = autodetectType(target.name)
-            if TYPE == "CIDR" or TYPE == "WILDCARD":
+            # if TYPE == "CIDR" or TYPE == "WILDCARD":
+            if TYPE == "CIDR":
+                debug("Exploding CIDR:"+str(target)+"\n")
+                for ip in netaddr.IPNetwork(target.name):
+                    debug(str(ip)+" ")
+                    PARSER_OUTPUT.write(str(ip)+"\n")
+            elif TYPE == "WILDCARD":
                 # don't write wild card or CIDR range to target as it is already expanded & scopped
                 continue
-                # debug("Exploding CIDR:"+str(target)+"\n")
-                # for ip in netaddr.IPNetwork(target.name):
-                #     debug(str(ip)+" ")
-                #     PARSER_OUTPUT.write(str(ip)+"\n")
             else:
                 debug(target.name+" ")
                 PARSER_OUTPUT.write(target.name+"\n")

@@ -51,6 +51,20 @@ class Command(BaseCommand):
                     
                 except:
                     NewData = False
+                    if kwargs['destination'] == "internal":
+                        logger.debug(f"internal update for {line}")
+                        Result = vdInServices.objects.filter(name=Host.name)
+                        logger.debug(f"{Result}")
+                        for result in Result:
+                            result.nname = Host.nname
+                            result.info = report_content
+                            result.ports = Host.full_ports
+                            result.full_ports = Host.full_ports
+                            result.info_gnmap = Host.line
+                            result.tag = MDT['tag']
+                            result.metadata = MDATA
+                            result.owner = MDT['owner']
+                            result.save()
                     debug("Finding Already exist:"+Host.name+":"+Host.nname+":"+Host.ipv4+":"+MDT['owner']+":"+Host.full_ports+"\n")
                 
                 if NewData:

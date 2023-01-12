@@ -324,7 +324,7 @@ def intargets(request):
 
     def target_discover():
         # referce: https://github.com/nmmapper/python3-nmap/nmap3/nmapparser.py
-        logger.debug("active target refresh")
+        logger.debug("quick active target discovery")
         Targets = vdInTarget.objects.all()
         timeout = None
         output = None
@@ -333,6 +333,7 @@ def intargets(request):
             # getting the target list
             logger.debug(f"processing target to make sure it is active {target.name}")
             # if autodetectType(target.name) == 'WILDCARD' or autodetectType(target.name) == 'CIDR':
+            # nmap -PS -PU # would have been better as it also gets the ports/service information; but -PU requires sudo
             cmd = f"nmap -sn -T4 -oX - {target.name}"
             # discover hosts that are up if CIDR range or wild card is input as target
             sub_proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -702,6 +703,62 @@ def inportscan(request):
         #os.system("nohup /opt/asf/tools/nmap/nmap.sh")
         context['running'] = True
 
+    def nmap_quick_scan():
+        # referce: https://github.com/nmmapper/python3-nmap/blob/master/nmap3/nmapparser.py
+        logger.debug("nmap quick scan")
+        Targets = vdInTarget.objects.all()
+        timeout = None
+        output = None
+        for target in Targets:
+            # do this only for taget with wild card; no need to delete that target, but has to be skipped while
+            # getting the target list
+            logger.debug(f"processing target to make sure it is active {target.name}")
+            # if autodetectType(target.name) == 'WILDCARD' or autodetectType(target.name) == 'CIDR':
+            cmd = f"nmap -sn -T4 -oX - {target.name}"
+            # cmd = f"nmap -sn -T4 -oJ - {target.name}" #JSON output
+            # discover hosts that are up if CIDR range or wild card is input as target
+            sub_proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            try:
+                output, errs = sub_proc.communicate(timeout=timeout)
+            except Exception as e:
+                sub_proc.kill()
+                raise (e)
+            else:
+                if 0 != sub_proc.returncode:
+                    raise NmapExecutionError('Error during command: "' + ' '.join(cmd) + '"\n\n' + errs.decode('utf8'))
+                if output:
+                    logger.debug(f"output from nmap scan {output}")
+                    xmlroot = ET.fromstring(output.decode('utf8').strip())
+                    scanned_host = xmlroot.findall("host")
+                    for hosts in scanned_host:
+                        address = hosts.find("address").get("addr")
+                        Type = autodetectType(address)
+                        logger.debug(f"host address {address} type {Type}")
+                        metadata = {}
+                        metadata['owner']="Admin from UI"
+                        Jmetadata = json.dumps(metadata)
+                        # update Tag with hostnames
+                        Tag = "Default"
+                        hostnames = hosts.findall("hostnames/hostname")
+                        hostnames_list = []
+                        for host in hostnames:
+                            if 'name' in host.attrib:
+                                hostnames_list.append(host.attrib['name'])
+                        if hostnames_list:
+                            Tag = ';'.join(hostnames_list)
+                        tz = timezone.get_current_timezone()
+                        LastDate = datetime.now().replace(tzinfo=tz)
+                        # update target
+                        try:
+                            # vdInTarget.objects.update_or_create(name=address, defaults={'type': Type, 'tag':Tag, 'lastdate': LastDate, 'owner': metadata['owner'], 'metadata': Jmetadata})
+                            vdInServices.objects.update_or_create(name=address, nname=address, ipv4=address, tag=Tag, type=Type, metadata = Jmetadata, owner = metadata['owner'])
+                            logger.debug(f"completed vdInTarget update for {address} {Tag}")
+                        except:
+                            logger.debug("vdTarget model update failed")
+                else:
+                    logger.debug("error in getting output")
+        context['running'] = False
+
 # refresh nmap scan status
     def nmap_refresh():
         if path.isfile("/home/nmap.int/reports/nmap.lock"):
@@ -769,7 +826,7 @@ def inportscan(request):
         return
     
 #Same dirty solution
-    action={'start':nmap_start, 'stop':nmap_stop, 'save_regexp':nmap_save_regexp, 'delete_regexp':nmap_delete_regexp, 'delete':nmap_delete, 'schedule': nmap_schedule, 'refresh': nmap_refresh}
+    action={'start':nmap_start, 'stop':nmap_stop, 'save_regexp':nmap_save_regexp, 'delete_regexp':nmap_delete_regexp, 'delete':nmap_delete, 'schedule': nmap_schedule, 'refresh': nmap_refresh, 'quick': nmap_quick_scan}
     logger.debug(f"request received {request.POST}")
     if 'nmap_action' in request.POST:
         if request.POST['nmap_action'] in action:

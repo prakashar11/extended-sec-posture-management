@@ -66,6 +66,11 @@ def parser_url(host):
                         debug("\tSkip:"+str(service)+"\n")
         else:
             debug("This host:"+host.name+" has no services???\n"+host.info+"\n")
+            # defaul to http & https
+            temp = "https://"+host.name
+            URL.append(temp)
+            temp="http://"+host.name
+            URL.append(temp)
         return URL
 
 def parser_ftp(host):

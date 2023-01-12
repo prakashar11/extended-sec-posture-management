@@ -56,9 +56,10 @@ A.4 Redteam - Module that runs submodules located in "/opt/asf/redteam"
 
 ### For Internal Targets: Step followed
 
-1. Internal-> Targets: search for wildcard/IP/CIDR; refresh active targets
-2. Port scan/enumeration; setup regex if required
-3. Red team - Input to select 'internal enumeration' and select module & save job
+1. Internal-> Targets: can specify specific IP or CIDR range or wildcard
+2. Initiate active target discovery for IP address with wildcard (without this discovery list, nmap enumeration won't work)
+3. Targets enumeration; quick (nmap ping sweep) or full enumeration setup regex if required
+4. Red team - Input to select 'internal enumeration' and select module & save job; can take targets that were enumerated through ping sweep
 4. Start job
 5. Alerts generated from the assessment; organized based on assessment id specific to a tool
 

@@ -20,7 +20,7 @@
 {% if running %}
 Nmap running
 {% else %}
-Nmap waiting
+Start Nmap Scan
 {% endif %}
 </td>
 <td>
@@ -39,7 +39,7 @@ Nmap waiting
   <form class="navbar-form" action="vd-in-portscan" method="post">
     {%csrf_token%}
  <input type="hidden" name="nmap_action" value="refresh">
- <button type="submit" class="btn btn-white btn-round btn-just-icon"  rel="tooltip" title="" data-original-title="Refresh">
+ <button type="submit" class="btn btn-white btn-round btn-just-icon"  rel="tooltip" title="Status" data-original-title="Refresh">
    <i class="material-icons">refresh status</i>
    <div class="ripple-container"></div>
  </button>
@@ -56,11 +56,25 @@ Nmap waiting
   </form>
 </td>
   {% else %}
+  <td>
+  <form class="navbar-form" action="vd-in-portscan" method="post">
+    {%csrf_token%}
  <input type="hidden" name="nmap_action" value="start">
-                <button type="submit" class="btn btn-white btn-round btn-just-icon" rel="tooltip" title="" data-original-title="Start">
+                <button type="submit" class="btn btn-white btn-round btn-just-icon" rel="tooltip" title="" data-original-title="Start Full Enumeration">
                   <i class="material-icons">play_arrow</i>
                   <div class="ripple-container"></div>
                 </button> 
+                </form></td>
+  <td>
+    <form class="navbar-form" action="vd-in-portscan" method="post">
+      {%csrf_token%}
+  <input type="hidden" name="nmap_action" value="quick">
+                <button type="submit" class="btn btn-white btn-round btn-just-icon" rel="tooltip" title="" data-original-title="Start Quick Enumeration">
+                  <i class="material-icons">play_arrow</i>
+                <div class="ripple-container"></div>
+              </button> 
+  </form>
+</td>
                 <!-- Filter:
              <select name='nmap_start_regex' class="form-control">
 {% for item in saved_regexp %}

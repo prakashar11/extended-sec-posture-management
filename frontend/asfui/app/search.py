@@ -58,6 +58,10 @@ def search(RegExp, Model_NAME, ExcludeRegExp = ""):
     def search_inservices(RegExp, ExcludeRegExp):
         sys.stderr.write("[SEARCH]: Searching in any host services\n")
         results = vdInServices.objects.none()
+        partial = vdInServices.objects.filter(name__regex=RegExp)
+        if ExcludeRegExp != "":
+            partial = partial.exclude(name__regex=ExcludeRegExp)
+        results = merge_results(partial, results)
         partial = vdInServices.objects.filter(info__regex=RegExp)
         if ExcludeRegExp != "":
             partial = partial.exclude(info__regex=ExcludeRegExp)
