@@ -152,5 +152,13 @@ JOB_PID=$!
 echo $JOB_PID>"$JOB_FOLDER/pid"
 wait $JOB_PID
 python3 /opt/asf/frontend/asfui/manage.py remaster_output --parser=nuclei.http.store --debug --input="$JOB_OUTPUT_FOLDER/app.log" --output=JobID:$1
-rm -v "$JOB_FOLDER/pid"
-rm -v "$JOB_FOLDER/.lock"
+
+if test -e "$JOB_FOLDER/pid"
+then
+  rm -v "$JOB_FOLDER/pid"
+fi
+
+if test -e "$JOB_FOLDER/.lock"
+then
+  rm -v "$JOB_FOLDER/.lock"
+fi

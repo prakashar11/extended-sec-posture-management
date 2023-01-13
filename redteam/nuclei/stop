@@ -17,6 +17,9 @@ then
     # sleep 5
     # kill -SIGKILL $PID
     # sleep 5
-    rm -v "$JOB_FOLDER/pid"
-    rm -v "$JOB_FOLDER/.lock"
+    # rm -v "$JOB_FOLDER/pid"
+    # rm -v "$JOB_FOLDER/.lock"
+    container_id=$(docker container ls | grep "projectdiscovery/nuclei" | awk '{print $1}')
+    (docker kill $container_id) &
+    wait $!
 fi
