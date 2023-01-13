@@ -334,6 +334,8 @@ def intargets(request):
             logger.debug(f"processing target to make sure it is active {target.name}")
             # if autodetectType(target.name) == 'WILDCARD' or autodetectType(target.name) == 'CIDR':
             # nmap -PS -PU # would have been better as it also gets the ports/service information; but -PU requires sudo
+            # nmap -sn (No port scan) -n (No DNS resolution. This speeds up our scan!) (was added after getting host with port 53)
+            # -T4 (prohibits the dynamic scan delay from exceeding 10 ms for TCP ports)
             cmd = f"nmap -sn -T4 -oX - {target.name}"
             # discover hosts that are up if CIDR range or wild card is input as target
             sub_proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -714,8 +716,7 @@ def inportscan(request):
             # getting the target list
             logger.debug(f"processing target to make sure it is active {target.name}")
             # if autodetectType(target.name) == 'WILDCARD' or autodetectType(target.name) == 'CIDR':
-            cmd = f"nmap -sn -T4 -oX - {target.name}"
-            # cmd = f"nmap -sn -T4 -oJ - {target.name}" #JSON output
+            cmd = f"nmap -sn -n -T4 -oX - {target.name}"
             # discover hosts that are up if CIDR range or wild card is input as target
             sub_proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             try:
@@ -1059,7 +1060,7 @@ def redteam(request):
                 if not path.exists("/opt/asf/frontend/asfui/core/static/jobs"):
                     os.symlink("/opt/asf/jobs","/opt/asf/frontend/asfui/core/static/jobs")
                 if path.exists(MODULE_FOLDER+"stop"):
-                    subprocess.Popen(["nohup", MODULE_FOLDER+"stop",str(job_id)], cwd=JOB_FOLDER)
+                    subprocess.Popen(["/bin/bash", MODULE_FOLDER+"stop",str(job_id)], cwd=JOB_FOLDER)
                     #Giving 10 seconds to stop
                     time.sleep(10)
                 else:

@@ -54,7 +54,7 @@ A.4 Redteam - Module that runs submodules located in "/opt/asf/redteam"
 
 ![Redteam](images/Redteam.jpg)
 
-### For Internal Targets: Step followed
+### For Internal Targets: Steps followed
 
 1. Internal-> Targets: can specify specific IP or CIDR range or wildcard
 2. Initiate active target discovery for IP address with wildcard (without this discovery list, nmap enumeration won't work)
