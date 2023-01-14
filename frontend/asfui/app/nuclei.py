@@ -376,7 +376,7 @@ def create_nuclei_finding(DATA):
     Nfinding.save()
     return
 
-def get_nuclei_templates(folders=['/home/nuclei-templates/']):
+def get_nuclei_templates(folders=['/opt/asf/toolsrun/nuclei-templates/']):
     FILES = []
     for folder in folders:
         debug(folder+"\n")

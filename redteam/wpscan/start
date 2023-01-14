@@ -7,7 +7,7 @@ then
 fi
 . /opt/asf/tools/scripts/arguments nuclei $1
 DATE_STAMP=`date +"%Y%m%d%H%M%S"`
-JOB_FOLDERS="/home/asf/jobs"
+JOB_FOLDERS="/opt/asf/jobs"
 JOB_FOLDER="$JOB_FOLDERS/$1"
 JOB_OUTPUT_FOLDER="$JOB_FOLDER/$DATE_STAMP"
 TERM="xterm"

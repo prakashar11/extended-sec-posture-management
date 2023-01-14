@@ -1,7 +1,7 @@
 #!/bin/bash
-OUTPUT_FOLDER="/home/nmap/reports"
-INPUT_FOLDER="/home/nmap"
 INSTALLED_PATH =/opt/asf
+OUTPUT_FOLDER="$INSTALLED_PATH/toolsrun/nmap/reports"
+INPUT_FOLDER="$INSTALLED_PATH/toolsrun/nmap"
 cd $INSTALLED_PATH/frontend/asfui
 # . bin/activate
 python3 manage.py nmap_input --input targets --output "$INPUT_FOLDER/targets.txt"
@@ -12,7 +12,7 @@ then
 	exit 1
 fi
 mkdir -p "$OUTPUT_FOLDER"
-> "/home/nmap/reports/nmap.lock"
+> "$INSTALLED_PATH/toolsrun/nmap/reports/nmap.lock"
 cat "$INPUT_FOLDER/targets_amass.txt" >> "$INPUT_FOLDER/targets.txt"
 
 #This line is for override and debug
@@ -25,7 +25,7 @@ cat "$INPUT_FOLDER/targets_amass.txt" >> "$INPUT_FOLDER/targets.txt"
 
 SNGHOSTS="127.0.0.1"
 BLACKLST="10.206.96.68"
-LOGDIR="/netlog/var/log/madnmap/"
+LOGDIR="$INSTALLED_PATH/toolsrun/netlog/var/log/madnmap/"
 WORKERS="64"
 TIMEOUT="360s"
 ABORTTM="480s"
@@ -48,8 +48,8 @@ sort -u "$INPUT_FOLDER/targets.txt" -o "$INPUT_FOLDER/targets.txt.unique"
 cat "$INPUT_FOLDER/targets.txt.unique" | while read H
     do 
     WFILE="/tmp/$DELTAD.madnmap/worker_$WORKER.sh"
-    #echo "echo Scanning host $H Thread:$WORKER; timeout -k $ABORTTM $TIMEOUT nmap -p- -Pn -T4 --open --reason -oA $OUTPUT_FOLDER/$DELTAD/Worker_$WORKER.$JOBID.txt -sC $H >> $OUTPUT_FOLDER/$DELTAD/Worker_$WORKER.log" >> "$WFILE"
-    echo "echo Scanning host $H Thread:$WORKER; timeout -k $ABORTTM $TIMEOUT nmap --top-ports 200 -sC -sV -Pn -T4 --open --reason -oA $OUTPUT_FOLDER/$DELTAD/Worker_$WORKER.$JOBID.txt -sC $H >> $OUTPUT_FOLDER/$DELTAD/Worker_$WORKER.log" >> "$WFILE"
+    #echo "echo Scanning host $H Thread:$WORKER; timeout -k $ABORTTM $TIMEOUT nmap --top-ports 200 -p- -Pn -T4 --open --reason -oA $OUTPUT_FOLDER/$DELTAD/Worker_$WORKER.$JOBID.txt -sC $H >> $OUTPUT_FOLDER/$DELTAD/Worker_$WORKER.log" >> "$WFILE"
+    echo "echo Scanning host $H Thread:$WORKER; timeout -k $ABORTTM $TIMEOUT nmap -sC -sV -Pn -T4 --open --reason -oA $OUTPUT_FOLDER/$DELTAD/Worker_$WORKER.$JOBID.txt -sC $H >> $OUTPUT_FOLDER/$DELTAD/Worker_$WORKER.log" >> "$WFILE"
     echo "cd '$INSTALLED_PATH/frontend/asfui'" >> "$WFILE"
     # echo ". bin/activate" >> "$WFILE"
 	echo "python3 manage.py nmapparse --input $OUTPUT_FOLDER/$DELTAD/Worker_$WORKER.$JOBID.txt --host $H --destination external" >> "$WFILE"
@@ -76,7 +76,7 @@ while sleep 60
     if test "$WLEFT" "=" "0"
 	then
 		echo "No more Hosts, Finished"
-		rm -fv "/home/nmap/reports/nmap.lock"
+		rm -fv "$INSTALLED_PATH/toolsrun/nmap/reports/nmap.lock"
 		break
 	else sleep 60
     fi

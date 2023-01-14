@@ -37,6 +37,7 @@ then
     exit 1
 fi
 . /opt/asf/tools/scripts/arguments nuclei $1
+INSTALLED_FOLDER="/opt/asf"
 DATE_STAMP=`date +"%Y%m%d%H%M%S"`
 JOB_FOLDERS="/opt/asf/jobs"
 #JOB_FOLDERS="/home/asf/jobs"
@@ -71,14 +72,14 @@ if ! docker images | grep $IMAGE_NAME
 then echo "Pulling nuclei..."
 docker pull $IMAGE_NAME:latest
 fi
-mkdir -p /home/nuclei-templates
-chmod 777 /home/nuclei-templates
-if ! test -e /home/nuclei-templates/README.md
+mkdir -p $INSTALLED_FOLDER/toolsrun/nuclei-templates
+chmod 777 $INSTALLED_FOLDER/toolsrun/nuclei-templates
+if ! test -e $INSTALLED_FOLDER/nuclei-templates/README.md
 then
-	docker run -i --rm -v $JOB_OUTPUT_FOLDER/:/mnt -v /home/nuclei-templates:/app/nuclei-templates $IMAGE_NAME  -update-templates 2>&1 > "$JOB_OUTPUT_FOLDER/app.log"
+	docker run -i --rm -v $JOB_OUTPUT_FOLDER/:/mnt -v $INSTALLED_FOLDER/nuclei-templates:/app/nuclei-templates $IMAGE_NAME  -update-templates 2>&1 > "$JOB_OUTPUT_FOLDER/app.log"
 fi
 #Reading exclude file
-python3 /opt/asf/frontend/asfui/manage.py nucleialert --mode=blacklist.save --templatesdir /home/nuclei-templates --templatesignorefile /home/nuclei-templates/.nuclei-ignore
+python3 $INSTALLED_FOLDER/frontend/asfui/manage.py nucleialert --mode=blacklist.save --templatesdir $INSTALLED_FOLDER/toolsrun/nuclei-templates --templatesignorefile $INSTALLED_FOLDER/toolsrun/nuclei-templates/.nuclei-ignore
 #$ARG0-$ARG9
 if [ $KUBE_FLAG = "TRUE" ]
 then
@@ -138,8 +139,9 @@ EOF
     kubectl exec --stdin --tty nuclei-$DATE_STAMP -- nuclei -v -no-color -t /app/nuclei-templates/cves/ -l /mnt/app.input 2>&1 | tee $JOB_OUTPUT_FOLDER/app.report.txt >> $JOB_OUTPUT_FOLDER/app.log
     kubectl delete pod nuclei-$DATE_STAMP
 else
-    #echo "executing docker" >> /var/log/nuclei.log
-    echo docker run --rm -v $JOB_OUTPUT_FOLDER/:/mnt -v /home/nuclei-templates:/app/nuclei-templates $IMAGE_NAME -t /app/nuclei-templates/ -no-color $ARG0 -l /mnt/app.input $ARG1 $ARG2  2>&1 \| tee "$JOB_OUTPUT_FOLDER/app.report.txt" \>\> "$JOB_OUTPUT_FOLDER/app.log" \&
+    # echo "executing docker" >> /var/log/nuclei.log
+    # echo docker run --rm -v $JOB_OUTPUT_FOLDER/:/mnt -v $INSTALLED_FOLDER/nuclei-templates:/app/nuclei-templates $IMAGE_NAME -t /app/nuclei-templates/ -no-color $ARG0 -l /mnt/app.input $ARG1 $ARG2  2>&1 \| tee "$JOB_OUTPUT_FOLDER/app.report.txt" \>\> "$JOB_OUTPUT_FOLDER/app.log" \&
+    echo docker run --rm -i $IMAGE_NAME -no-color $ARG0 -json -c 75 $ARG1 $ARG2 -<$JOB_OUTPUT_FOLDER/app.input  2>&1 | tee "$JOB_OUTPUT_FOLDER/app.report.txt" >> "$JOB_OUTPUT_FOLDER/app.log" &
     # docker run --rm -v /home/asf/jobs/2/20221230201914/:/mnt/ -v /home/nuclei-templates:/app/nuclei-templates projectdiscovery/nuclei -no-color -u http://192.168.1.135
     # docker run --rm -v $JOB_OUTPUT_FOLDER/:/mnt -v /home/nuclei-templates:/app/nuclei-templates $IMAGE_NAME -t /app/nuclei-templates/ -no-color $ARG0 -l /mnt/app.input $ARG1 $ARG2  2>&1 | tee "$JOB_OUTPUT_FOLDER/app.report.txt" >> "$JOB_OUTPUT_FOLDER/app.log" &
     # docker run --rm -v $JOB_OUTPUT_FOLDER/:/mnt $IMAGE_NAME -no-color $ARG0 -l /mnt/app.input -json $ARG1 $ARG2  2>&1 | tee "$JOB_OUTPUT_FOLDER/app.report.txt" >> "$JOB_OUTPUT_FOLDER/app.log" &

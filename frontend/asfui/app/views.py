@@ -383,6 +383,10 @@ def intargets(request):
     if 'target_action' in request.POST:
         if request.POST['target_action'] in action:
             action[request.POST['target_action']]()
+            post = request.POST.copy() # to make it mutable
+            post['target_action'] = ""
+            request.POST = post
+            logger.debug(f"updated request.POST to {request.POST}")
             
 #Query all objects    
     page = 0
@@ -411,9 +415,9 @@ def intargets(request):
 def amass(request):
     context = {}
     context['segment'] = 'vd-amass'
-    ensure_dirs("/home/amass/reports")
+    ensure_dirs("/opt/asf/toolsrun/amass/reports")
 
-    if path.isfile("/home/discovery/.lock"):
+    if path.isfile("/opt/asf/toolsrun/discovery/.lock"):
         context['running'] = True
     else:
         context['running'] = False
@@ -429,9 +433,9 @@ def amass(request):
         #subprocess.Popen(["killall", "amass.sh"])
         subprocess.Popen(["killall", "subfinder.sh"])
         #if path.exists("/home/amass/reports/amass.txt"):
-        if path.exists("/home/discovery/.lock"):
+        if path.exists("/opt/asf/toolsrun/discovery/.lock"):
             #os.remove("/home/amass/reports/amass.txt")
-            os.remove("/home/discovery/.lock")
+            os.remove("/opt/asf/toolsrun/discovery/.lock")
         #subprocess.Popen(["killall", "amass"])
         subprocess.Popen(["killall", "subfinder"])
         context['running'] = False
@@ -511,7 +515,7 @@ def portscan(request):
     context = {}
     context['segment'] = 'vd-portscan'
     context['query_results'] = "Ninguno"
-    ensure_dirs("/home/nmap/reports")
+    ensure_dirs("/opt/asf/toolsrun/nmap/reports")
     page = 0
     page_size = GENERAL_PAGE_SIZE
     if 'page' in request.POST:
@@ -540,7 +544,7 @@ def portscan(request):
         context['show_save'] = False
     context['saved_regexp'] = vdRegExp.objects.all()[0:3000]
         
-    if path.isfile("/home/nmap/reports/nmap.lock"):
+    if path.isfile("/opt/asf/toolsrun/nmap/reports/nmap.lock"):
         context['running'] = True
     else:
         context['running'] = False
@@ -572,8 +576,8 @@ def portscan(request):
     def nmap_stop():
         sys.stdout.write("Stopping Nmap")
         subprocess.Popen(["killall", "nmap.sh"])
-        if path.exists("/home/nmap/reports/nmap.lock"):
-            os.remove("/home/nmap/reports/nmap.lock")
+        if path.exists("/opt/asf/toolsrun/nmap/reports/nmap.lock"):
+            os.remove("/opt/asf/toolsrun/nmap/reports/nmap.lock")
         #subprocess.Popen(["killall", "nmap"])
         os.system("killall nmap")
         context['running'] = False
@@ -642,38 +646,38 @@ def portscan(request):
 def inportscan(request):
     context = {}
     context['segment'] = 'vd-in-portscan'
-    context['query_results'] = "Ninguno"
-    ensure_dirs("/home/nmap.int/reports")
-    page = 0
-    page_size = GENERAL_PAGE_SIZE
-    if 'page' in request.POST:
-        page = int(request.POST['page'])
+    # context['query_results'] = "Ninguno"
+    # ensure_dirs("/opt/asf/toolsrun/nmap.int/reports")
+    # page = 0
+    # page_size = GENERAL_PAGE_SIZE
+    # if 'page' in request.POST:
+    #     page = int(request.POST['page'])
     
-    ResultsExclude = ""
-    if 'results_exclude' in request.POST:
-        ResultsExclude=request.POST['results_exclude']
-        context['results_exclude'] = ResultsExclude
+    # ResultsExclude = ""
+    # if 'results_exclude' in request.POST:
+    #     ResultsExclude=request.POST['results_exclude']
+    #     context['results_exclude'] = ResultsExclude
 
-    if 'results_search' in request.POST:
-        ResultsSearch=request.POST['results_search']
-        context['query_results'] = search(ResultsSearch, 'inservices', ResultsExclude)
-        context['query_count'] = context['query_results'].count() 
-        slicer = pager(context, page, page_size, context['query_count'])
-        context['query_results'] = context['query_results'][slicer]
-        context['results_search'] = ResultsSearch
-        context['show_save'] = True
-    else:
-        context['query_results'] = vdInServices.objects.all()
-        context['query_count'] = context['query_results'].count()
-        slicer = pager(context, page, page_size, context['query_count'])
-        context['query_results'] = context['query_results'][slicer]
-        context['show_save'] = False
-    context['saved_regexp'] = vdRegExp.objects.all()[0:3000]
+    # if 'results_search' in request.POST:
+    #     ResultsSearch=request.POST['results_search']
+    #     context['query_results'] = search(ResultsSearch, 'inservices', ResultsExclude)
+    #     context['query_count'] = context['query_results'].count() 
+    #     slicer = pager(context, page, page_size, context['query_count'])
+    #     context['query_results'] = context['query_results'][slicer]
+    #     context['results_search'] = ResultsSearch
+    #     context['show_save'] = True
+    # else:
+    #     context['query_results'] = vdInServices.objects.all()
+    #     context['query_count'] = context['query_results'].count()
+    #     slicer = pager(context, page, page_size, context['query_count'])
+    #     context['query_results'] = context['query_results'][slicer]
+    #     context['show_save'] = False
+    # context['saved_regexp'] = vdRegExp.objects.all()[0:3000]
         
-    if path.isfile("/home/nmap.int/reports/nmap.lock"):
-        context['running'] = True
-    else:
-        context['running'] = False
+    # if path.isfile("/opt/asf/toolsrun/nmap.int/reports/nmap.lock"):
+    #     context['running'] = True
+    # else:
+    #     context['running'] = False
         
     def host_picture(HostWithServices):
         NEW_HWS = []
@@ -762,7 +766,7 @@ def inportscan(request):
 
 # refresh nmap scan status
     def nmap_refresh():
-        if path.isfile("/home/nmap.int/reports/nmap.lock"):
+        if path.isfile("/opt/asf/toolsrun/nmap.int/reports/nmap.lock"):
             context['running'] = True
         else:
             context['running'] = False
@@ -770,8 +774,8 @@ def inportscan(request):
     def nmap_stop():
         sys.stdout.write("Stopping Nmap for Internal Networks")
         subprocess.Popen(["killall", "nmap.int.sh"])
-        if path.exists("/home/nmap.int/reports/nmap.lock"):
-            os.remove("/home/nmap.int/reports/nmap.lock")
+        if path.exists("/opt/asf/toolsrun/nmap.int/reports/nmap.lock"):
+            os.remove("/opt/asf/toolsrun/nmap.int/reports/nmap.lock")
         #We should not kill nmap, because external nmap could be running.
         #subprocess.Popen(["killall", "nmap"])
         os.system("killall nmap.int")
@@ -832,11 +836,48 @@ def inportscan(request):
     if 'nmap_action' in request.POST:
         if request.POST['nmap_action'] in action:
             action[request.POST['nmap_action']]()
-    context['query_results'] = host_picture(context['query_results'])
+    
+    if not 'query_results' in context:
+        context['query_results'] = ""
+
     #Here we add data from the previous system timer, and pass it to the view via context dictionary
     InNmap = sdService({"name":"vdinnmap"})
     InNmap.read()
     InNmap.setContext(context)
+    
+    ensure_dirs("/opt/asf/toolsrun/nmap.int/reports")
+    page = 0
+    page_size = GENERAL_PAGE_SIZE
+    if 'page' in request.POST:
+        page = int(request.POST['page'])
+    
+    ResultsExclude = ""
+    if 'results_exclude' in request.POST:
+        ResultsExclude=request.POST['results_exclude']
+        context['results_exclude'] = ResultsExclude
+
+    if 'results_search' in request.POST:
+        ResultsSearch=request.POST['results_search']
+        context['query_results'] = search(ResultsSearch, 'inservices', ResultsExclude)
+        context['query_count'] = context['query_results'].count() 
+        slicer = pager(context, page, page_size, context['query_count'])
+        context['query_results'] = context['query_results'][slicer]
+        context['results_search'] = ResultsSearch
+        context['show_save'] = True
+    else:
+        context['query_results'] = vdInServices.objects.all()
+        context['query_count'] = context['query_results'].count()
+        slicer = pager(context, page, page_size, context['query_count'])
+        context['query_results'] = context['query_results'][slicer]
+        context['show_save'] = False
+    context['saved_regexp'] = vdRegExp.objects.all()[0:3000]
+    context['query_results'] = host_picture(context['query_results'])
+        
+    if path.isfile("/opt/asf/toolsrun/nmap.int/reports/nmap.lock"):
+        context['running'] = True
+    else:
+        context['running'] = False
+
     logger.debug(f"context {context} for action {request.POST}")
     html_template = loader.get_template( 'vd-in-portscan.html' )
     return HttpResponse(html_template.render(context, request))

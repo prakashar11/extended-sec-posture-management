@@ -45,7 +45,7 @@ def get_msfconfig_by_module(module_name, module_type = 'exploit'):
 
 def msf_read_args(Job):
     job_id = Job.id
-    JOB_FOLDER = "/home/asf/jobs/"+str(job_id)+"/"
+    JOB_FOLDER = "/opt/asf/jobs/"+str(job_id)+"/"
     FileName = JOB_FOLDER+"msf.asfui"
     config = {}
     if os.path.isfile(FileName):
@@ -70,7 +70,7 @@ def msf_save_args(request):
         MSFC = {}
         job_id = request.POST['job_id']
         Job = vdJob.objects.filter(id = job_id)[0]
-        JOB_FOLDER = "/home/asf/jobs/"+str(job_id)+"/"
+        JOB_FOLDER = "/opt/asf/jobs/"+str(job_id)+"/"
         FileName = JOB_FOLDER+"msf.asfui"
         if 'exploit' in request.POST:
             MSFC['exploit'] = request.POST['exploit']

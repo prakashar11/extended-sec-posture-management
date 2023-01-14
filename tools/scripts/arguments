@@ -9,7 +9,7 @@ then echo "usage $0 modulename jobid"
 exit -1
 fi
 declare MFOLDER="/opt/asf/redteam/$1"
-declare JFOLDER="/home/asf/jobs/$2"
+declare JFOLDER="/opt/asf/jobs/$2"
 for n in `seq 0 9`
 do
 	VARNAME="ARG$n"

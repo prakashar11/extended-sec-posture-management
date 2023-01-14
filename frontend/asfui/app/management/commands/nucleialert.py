@@ -96,8 +96,8 @@ class Command(BaseCommand):
         #parser.add_argument('--input', help='The input file, if not provided stdin is used', default='stdin')
         #parser.add_argument('--output', help='The output JobID:ID', default='error')
         parser.add_argument('--mode', help='The algorithm [default(alert.duedate)|clean, purge, templates, blacklist] for reviewing the findings and alert for not attended', default='default')
-        parser.add_argument('--templatesdir', help='The template directory, default /home/nuclei-templates', default="/home/nuclei-templates")
-        parser.add_argument('--templatesignorefile', help='The template directory, default /home/nuclei-templates/.nuclei-ignore', default="/home/nuclei-templates/.nuclei-ignore")
+        parser.add_argument('--templatesdir', help='The template directory, default /opt/asf/toolsrun/nuclei-templates', default="/opt/asf/toolsrun/nuclei-templates")
+        parser.add_argument('--templatesignorefile', help='The template directory, default /opt/asf/toolsrun/nuclei-templates/.nuclei-ignore', default="/opt/asf/toolsrun/nuclei-templates/.nuclei-ignore")
         parser.add_argument('--debug', help='Print verbose data', action='store_true', default=False)
         
     def handle(self, *args, **kwargs):        

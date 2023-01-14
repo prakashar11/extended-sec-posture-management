@@ -12,7 +12,7 @@ JOB_FOLDER="$JOB_FOLDERS/$1"
 if test -e "$JOB_FOLDER/pid"
 then
     PID=$(cat $JOB_FOLDER/pid)
-    kill -SIGTERM $PID &
+    (kill -SIGTERM $PID) &
     wait $!
     # sleep 5
     # kill -SIGKILL $PID

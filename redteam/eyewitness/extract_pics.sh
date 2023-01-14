@@ -5,7 +5,7 @@ then
     exit 1
 fi
 cd "$1"
-STATIC="/home/asf/hosts"
+STATIC="/opt/asf/hosts"
 cat app.asf | awk '{print $2}' > app.asf.list
 cat app.asf | awk '{print $3}' | awk -F '(' '{print $2}' | awk -F ')' '{print $1}' >> app.asf.list
 

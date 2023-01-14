@@ -6,7 +6,8 @@ function debugsub {
 . /opt/asf/tools/subfinder/subfinder.hack
 DSTAMP=$(date '+%Y%m%d%H%M')
 IMAGE="m4ch1n3s/subfinder"
-OUTPUT_DIR_PATH="/home/discovery"
+INSTALLED_PATH="/opt/asf"
+OUTPUT_DIR_PATH="$INSTALLED_PATH/toolsrun/discovery"
 WDIR=`pwd`
 mkdir -p "${OUTPUT_DIR_PATH}/reports"
 mkdir -p "${OUTPUT_DIR_PATH}/history"

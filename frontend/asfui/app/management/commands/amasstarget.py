@@ -13,7 +13,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         #Targets=vdTarget.objects.all()
         Targets=vdTarget.objects.filter(type='DOMAIN')
-        FileTargets=open("/home/amass/targets.txt",'w+')
+        FileTargets=open("/opt/asf/toolsrun/amass/targets.txt",'w+')
         for domain in Targets:
             FileTargets.write(domain.name+"\n")
         sys.stdout.write("Starting Amass")

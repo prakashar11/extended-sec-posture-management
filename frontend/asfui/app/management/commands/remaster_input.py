@@ -161,7 +161,7 @@ class Command(BaseCommand):
             if "JobID:" in kwargs['input']:
                 JobID = kwargs['input'].split("JobID:")[1]
                 debug("Requested to extract data from database backend for JobID:"+JobID+"\n")
-                JOB_FOLDER = "/home/asf/jobs/"+JobID+"/"
+                JOB_FOLDER = "/opt/asf/jobs/"+JobID+"/"
                 JOB_FILENAME = JOB_FOLDER+"app.asf"
                 try:
                     Job = vdJob.objects.filter(id = JobID)[0]

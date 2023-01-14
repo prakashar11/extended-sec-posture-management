@@ -19,16 +19,17 @@
                 <input type="file" name="target_file">
                 <input type="hidden" name="target_action" value="new">
                </td>
-               <td>
+               <!-- <td>
                 <select name="mode">
                 <option value="merge" selected>Merge</option>
                 <option value="delete">Delete</option>
 				<option value="deletebytag">Delete by Tag</option>                
                 <option value="sync">Synchronize</option>
                 </select>
-               </td>
+               </td> -->
+               <!-- <b>Merge:</b>Append new objects. <b>Delete:</b> Removes matching objects. <b>Sync:</b>Flush Orphans and append new assets by TAG. -->
                <td>
-                <input onClick="this.select();" type="text" name='tag' value="DEFAULT" class="form-control" placeholder="TAG" size="10">
+                <input onClick="this.select();" type="text" name='tag' value="Tag_Default" class="form-control" placeholder="TAG" size="10">
                </td>
                <td>
                 <button type="submit" class="btn btn-white btn-round btn-just-icon">
@@ -37,13 +38,12 @@
                 </button>
                </td>
                 </tr>
-                </table>                
-              </div></span>
+                
 </form>
 <tr>
 <td>
 <b>Active target discovery</b> 
-  <form class="navbar-form" action="vd-in-targets" method="post">
+  <form class="navbar-form" action="vd-in-targets" method="post" style="display: inline;">
     {%csrf_token%}
   <input type="hidden" name="target_action" value="discover">
                 <button type="submit" class="btn btn-white btn-round btn-just-icon" rel="tooltip" title="" data-original-title="Active target discovery">
@@ -52,19 +52,20 @@
               </button> 
   </form>
 </td>
-</tr>
-<b>Merge:</b>Append new objects. <b>Delete:</b> Removes matching objects. <b>Sync:</b>Flush Orphans and append new assets by TAG.
+<td>
+  <b>Export targets</b> 
 <form class="navbar-form" action="vd-export" method="post" style="display: inline;">
 	{%csrf_token%}
-          <span class="bmd-form-group"><div class="input-group no-border">
  <input type="hidden" name="model" value="intargets">
-          <button type="submit" class="btn btn-white btn-round btn-just-icon">
+          <button type="submit" class="btn btn-white btn-round btn-just-icon" rel="tooltip" title="" data-original-title="Export">
           <i class="material-icons">system_update_alt</i>
           <div class="ripple-container"></div>
           </button>
-          </div></span>
 </form>
-
+</td>
+</tr>
+</table>                
+</div></span>
 <!-- Pager  -->
  <table width="100%">
  <tr>
