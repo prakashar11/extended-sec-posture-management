@@ -322,8 +322,36 @@ def intargets(request):
     def target_delete():
         target_delete_model(vdInTarget,vdInServices,request,context,autodetectType,delta)
 
+    def parse_ports(xml_hosts):
+        """
+        Parse parts from xml
+        """
+        open_ports_list = []
+        
+        for port in xml_hosts.findall("ports/port"):
+            open_ports = {}            
+            for key in port.attrib:
+                open_ports[key]=port.attrib.get(key)
+                
+            if(port.find('state') is not None):
+                for key in port.find('state').attrib:
+                    open_ports[key]=port.find("state").attrib.get(key)
+           
+            if(port.find('service') is not None):
+                open_ports["service"]=port.find("service").attrib
+                cpe_list = []
+                for cp in port.find("service").findall("cpe"):
+                    cpe_list.append({"cpe": cp.text})
+                open_ports["cpe"] = cpe_list
+            
+            # Script
+            # open_ports["scripts"]=self.parse_scripts(port.findall('script')) if port.findall('script') is not None else []
+            open_ports_list.append(f"{open_ports}")
+            
+        return open_ports_list
+
     def target_discover():
-        # referce: https://github.com/nmmapper/python3-nmap/nmap3/nmapparser.py
+        # referce: https://github.com/nmmapper/python3-nmap/blob/master/nmap3/nmapparser.py
         logger.debug("quick active target discovery")
         Targets = vdInTarget.objects.all()
         timeout = None
@@ -336,7 +364,9 @@ def intargets(request):
             # nmap -PS -PU # would have been better as it also gets the ports/service information; but -PU requires sudo
             # nmap -sn (No port scan) -n (No DNS resolution. This speeds up our scan!) (was added after getting host with port 53)
             # -T4 (prohibits the dynamic scan delay from exceeding 10 ms for TCP ports)
-            cmd = f"nmap -sn -T4 -oX - {target.name}"
+            # 'nmap -F --open -oX - <target' # offers fast scan with XML results on open ports
+            # cmd = f"nmap -sn -T4 -oX - {target.name}"
+            cmd = f"nmap -F -T4 -oX - {target.name}"
             # discover hosts that are up if CIDR range or wild card is input as target
             sub_proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             try:
@@ -369,9 +399,10 @@ def intargets(request):
                             Tag = ';'.join(hostnames_list)
                         tz = timezone.get_current_timezone()
                         LastDate = datetime.now().replace(tzinfo=tz)
+                        port_details = parse_ports(hosts)
                         # update target
                         try:
-                            vdInTarget.objects.update_or_create(name=address, defaults={'type': Type, 'tag':Tag, 'lastdate': LastDate, 'owner': metadata['owner'], 'metadata': Jmetadata})
+                            vdInTarget.objects.update_or_create(name=address, defaults={'type': Type, 'tag':Tag, 'lastdate': LastDate, 'owner': metadata['owner'], 'metadata': Jmetadata}, info=json.dumps(port_details, indent=4))
                             logger.debug(f"completed vdInTarget update for {address} {Tag}")
                         except:
                             logger.debug("vdTarget model update failed")

@@ -19,6 +19,9 @@ def target_new_model(vdTargetModel,vdServicesModel,request,context,autodetectTyp
         tz = timezone.get_current_timezone()
         LastDate = datetime.now().replace(tzinfo=tz)
         WorkMode = "merge"
+        asset_criticality = "medium"
+        if "assetcriticality" in request.POST:
+            asset_criticality = request.POST['assetcriticality'].strip() 
         if "tag" in request.POST:
             Tag = request.POST['tag'].strip()                
         if not domain == "":
@@ -26,7 +29,7 @@ def target_new_model(vdTargetModel,vdServicesModel,request,context,autodetectTyp
             metadata = {}
             metadata['owner']="Admin from UI"
             Jmetadata = json.dumps(metadata)
-            vdTargetModel.objects.update_or_create(name=domain, defaults={'type': Type, 'tag':Tag, 'lastdate': LastDate, 'owner': metadata['owner'], 'metadata': Jmetadata})
+            vdTargetModel.objects.update_or_create(name=domain, defaults={'type': Type, 'tag':Tag, 'lastdate': LastDate, 'owner': metadata['owner'], 'metadata': Jmetadata}, assetcriticality=asset_criticality)
         if 'target_file' in request.FILES:
             target_file = request.FILES['target_file']
             fs = FileSystemStorage()
@@ -42,7 +45,7 @@ def target_new_model(vdTargetModel,vdServicesModel,request,context,autodetectTyp
                 metadata['bulk']=target_file.name
                 Jmetadata = json.dumps(metadata)
                 try:
-                    vdTargetModel.objects.update_or_create(name=domain, defaults={'type': Type, 'tag':Tag, 'lastdate': LastDate, 'owner':metadata['owner'], 'metadata': Jmetadata})
+                    vdTargetModel.objects.update_or_create(name=domain, defaults={'type': Type, 'tag':Tag, 'lastdate': LastDate, 'owner':metadata['owner'], 'metadata': Jmetadata}, assetcriticality=asset_criticality)
                 except:
                     sys.stderr.write("Duplicated Target, Skipping:"+domain)
                     

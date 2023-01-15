@@ -32,6 +32,9 @@
                 <input onClick="this.select();" type="text" name='tag' value="Tag_Default" class="form-control" placeholder="TAG" size="10">
                </td>
                <td>
+                <input onClick="this.select();" type="text" name='assetcriticality' value="medium" class="form-control" placeholder="assetcriticality" size="10">
+               </td>
+               <td>
                 <button type="submit" class="btn btn-white btn-round btn-just-icon">
                   <i class="material-icons">save</i>
                   <div class="ripple-container"></div>
@@ -140,6 +143,9 @@
                           Type
                         </th>
                         <th>
+                          Criticality
+                        </th>
+                        <th>
                           Tag
                         </th>                        
                         <th>
@@ -161,11 +167,14 @@
                           <td>
                             {{ item.id }}
                           </td>
-                          <td>
+                          <td onclick="row = document.getElementById('info-{{ item.id }}');if (row.style.display=='none') {row.style.display='';}else{row.style.display='none';}">
                             {{ item.name }}
                           </td>
                           <td>
                             {{ item.type }}
+                          </td>
+                          <td>
+                            {{ item.assetcriticality }}
                           </td>
                           <td>
                             {{ item.tag }}
@@ -200,6 +209,11 @@
                         </form>
                           </td>
                         </tr>
+                        <td colspan=10 id="info-{{ item.id }}" style="display: none">
+                          <span onclick="row = document.getElementById('info-{{ item.id }}'); if (row.style.display=='none') {row.style.display='';}else{row.style.display='none';}" style="text-align: left;"></span>
+                          {{ item.info | linebreaks }}
+                            </span>
+                            </td>
                         </tr>
                         <tr>
                         <td colspan=10 id="metadata-{{ item.id }}" style="display: none;">
