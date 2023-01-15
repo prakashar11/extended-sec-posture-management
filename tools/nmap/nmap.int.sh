@@ -68,7 +68,7 @@ while sleep 60
     if test "$WLEFT" "=" "0"
 	then
 		echo "No more Hosts, Finished"
-		rm -fv "/home/nmap.int/reports/nmap.lock"
+		rm -fv "$OUTPUT_FOLDER/nmap.lock"
 		break
 	else sleep 60
     fi

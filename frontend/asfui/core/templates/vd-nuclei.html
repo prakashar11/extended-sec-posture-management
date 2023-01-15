@@ -147,10 +147,10 @@
                         </form>
 						<form method="post" action="vd-nuclei" style="display: inline;">
                         {%csrf_token%}
-						  <input type="hidden" name='domain_search' value="{{ domain_search }}">                        
+						  <!-- <input type="hidden" name='domain_search' value="{{ domain_search }}">                        
 						{{ nuclei_filter_hidden }}
                           <input type="hidden" name="nuclei_action" value="ptime">
-                          {{ nuclei_selector }}
+                          {{ nuclei_selector }} -->
 							<button type="submit" rel="tooltip" title="" class="btn btn-white btn-round btn-just-icon" data-original-title="Set Priority Time">
                           	<i class="material-icons">date_range</i>
                         	</button>
@@ -261,6 +261,9 @@
                         <th>
                           Initial Discovery
                         </th>
+                        <th>
+                          Alert Action
+                        </th>
                         <!-- <th>
                           Last Presence
                         </th>
@@ -304,35 +307,33 @@
                           <!-- <td>
                             {{ item.lastdate }}
                           </td>                           -->
-                          <td class="text-primary">
-                          <div rel="tooltip" title="" data-original-title="{{ item.bumpdate }}">{{ item.ptime }}
-							<form method="post" action="vd-nuclei" style="display: inline;">
-                        {%csrf_token%}
-                          <input type="hidden" name="name" value="{{ item.name }}">
-                          <input type="hidden" name="vulnerability" value="{{ item.vulnerability }}">
-                          <input type="hidden" name='domain_search' value="{{ domain_search }}">
-                          <input type="hidden" name="nuclei_action" value="ptime">
-                          {{ nuclei_selector }}
-							<button type="submit" rel="tooltip" title="" class="btn btn-white btn-round btn-just-icon" data-original-title="Set Priority Time">
-                          	<i class="material-icons">date_range</i>
-                        	</button>
-                        </form> 
-                          </div>
-                          </td>
-                          <td class="text-primary">
-                          <span onclick="row = document.getElementById('metadata-{{ item.id }}'); if (row.style.display=='none') {row.style.display='';}else{row.style.display='none';}">
+                          <!-- <td class="text-primary"> -->
+                          <!-- <div rel="tooltip" title="" data-original-title="{{ item.bumpdate }}">{{ item.ptime }} -->
+                            <!-- <div rel="tooltip" title="" data-original-title=""> -->
+                          <!-- <td class="text-primary"> -->
+                          <!-- <span onclick="row = document.getElementById('metadata-{{ item.id }}'); if (row.style.display=='none') {row.style.display='';}else{row.style.display='none';}">
                             {{ item.owner }}
                           </span>
-                          </td>
-                          <td style="text-align: center;">
+                          </td> -->
+                          <!-- <td style="text-align: center;"> -->
 <!--                         <form method="post" action="vd-nuclei" style="display: inline;">
                         {%csrf_token%}
                           <input type="hidden" name="id" value="{{ item.id }}">
                           <input type="hidden" name="nuclei_action" value="filter">
 							<button type="submit" rel="tooltip" title="" class="btn btn-primary btn-link btn-sm" data-original-title="Run new Scan">
                           	<i class="material-icons">dashboard</i>
-                        	</button>
+                        	</button> 
                         </form> -->
+                        <td onclick="row = document.getElementById('alertaction-{{ item.id }}');if (row.style.display=='none') {row.style.display='';}else{row.style.display='none';}">
+                          <form method="post" action="vd-nuclei" style="display: inline;">
+                            {%csrf_token%}
+                              <input type="hidden" name="name" value="{{ item.name }}">
+                              <input type="hidden" name="vulnerability" value="{{ item.vulnerability }}">
+                              <input type="hidden" name="nuclei_action" value="false">
+                  <button type="submit" rel="tooltip" title="" class="btn btn-white btn-round btn-just-icon" data-original-title="False Positive">
+                                <i class="material-icons">flaky</i>
+                              </button>
+                            </form>  
                         <form method="post" action="vd-nuclei" style="display: inline;">
                         {%csrf_token%}
                           <input type="hidden" name="name" value="{{ item.name }}">
@@ -351,36 +352,43 @@
                           	<i class="material-icons">check_circle_outline</i>
                         	</button>
                         </form>
-						<form method="post" action="vd-nuclei" style="display: inline;">
-                        {%csrf_token%}
-                          <input type="hidden" name="name" value="{{ item.name }}">
-                          <input type="hidden" name="vulnerability" value="{{ item.vulnerability }}">
-                          <input type="hidden" name="nuclei_action" value="false">
-							<button type="submit" rel="tooltip" title="" class="btn btn-white btn-round btn-just-icon" data-original-title="False Positive">
-                          	<i class="material-icons">flaky</i>
-                        	</button>
-                        </form>                        
-						<form method="post" action="vd-nuclei" style="display: inline;">
-                        {%csrf_token%}
-                          <input type="hidden" name="name" value="{{ item.name }}">
-                          <input type="hidden" name="vulnerability" value="{{ item.vulnerability }}">
-                          <input type="hidden" name="nuclei_action" value="bump">
-							<button type="submit" rel="tooltip" title="" class="btn btn-white btn-round btn-just-icon" data-original-title="Reschedule">
-                          	<i class="material-icons">model_training</i>
-                        	</button>
-                        </form>
-                          </td>
-                        </tr>
-                        </tr>
+                      </td>                  
+                        <!-- </div> -->
+                        <!-- </tr>
+                        </tr> -->
                         <tr>
                         <td colspan=10 id="metadata-{{ item.id }}" style="display: none;">
-                        <span onclick="row = document.getElementById('metadata-{{ item.id }}'); if (row.style.display=='none') {row.style.display='';}else{row.style.display='none';}" style="overflow-wrap: anywhere">
+                        <span onclick="row = document.getElementById('metadata-{{ item.id }}'); if (row.style.display=='none') {row.style.display='';}else{row.style.display='none';}" style="text-align: left;">
                         Metadata: {{ item.metadata }}<br>
                         Sub Assessment Id: {{ item.alert_sub_test_id }}<br>
                         Tools engine: {{ item.engine }}<br>
                         Alert status: {{ item.status }}<br>
                         </span>
                         </td>
+                        <td colspan=10 id="alertaction-{{ item.id }}" style="display: none;">
+                          <span onclick="row = document.getElementById('alertaction-{{ item.id }}'); if (row.style.display=='none') {row.style.display='';}else{row.style.display='none';}" style="text-align: right;">
+                            <form method="post" action="vd-nuclei" style="display: inline;">
+                              {%csrf_token%}
+                                <input type="hidden" name="name" value="{{ item.name }}">
+                                <input type="hidden" name="vulnerability" value="{{ item.vulnerability }}">
+                                <input type="hidden" name="nuclei_action" value="bump">
+                    <button type="submit" rel="tooltip" title="" class="btn btn-white btn-round btn-just-icon" data-original-title="Reschedule">
+                                  <i class="material-icons">model_training</i>
+                                </button>
+                              </form>
+                              <form method="post" action="vd-nuclei" style="display: inline;">
+                                {%csrf_token%}
+                                  <input type="hidden" name="name" value="{{ item.name }}">
+                                  <input type="hidden" name="vulnerability" value="{{ item.vulnerability }}">
+                                  <!-- <input type="hidden" name='domain_search' value="{{ domain_search }}"> -->
+                                  <!-- <input type="hidden" name="nuclei_action" value="ptime"> -->
+                                  <!-- {{ nuclei_selector }} -->
+                      <button type="submit" rel="tooltip" title="" class="btn btn-white btn-round btn-just-icon" data-original-title="Set Priority Time">
+                                    <i class="material-icons">date_range</i>
+                                  </button>
+                                </form> 
+                          </span>
+                          </td>
                         </tr>
 
 {% endfor %}
