@@ -384,7 +384,7 @@ def intargets(request):
                     for hosts in scanned_host:
                         address = hosts.find("address").get("addr")
                         Type = autodetectType(address)
-                        logger.debug(f"host address {address} type {Type}")
+                        # logger.debug(f"host address {address} type {Type}")
                         metadata = {}
                         metadata['owner']="Admin from UI"
                         Jmetadata = json.dumps(metadata)
@@ -405,7 +405,13 @@ def intargets(request):
                             vdInTarget.objects.update_or_create(name=address, defaults={'type': Type, 'tag':Tag, 'lastdate': LastDate, 'owner': metadata['owner'], 'metadata': Jmetadata}, info=json.dumps(port_details, indent=4))
                             logger.debug(f"completed vdInTarget update for {address} {Tag}")
                         except:
-                            logger.debug("vdTarget model update failed")
+                            # directly updating the model
+                            Results = vdInTarget.objects.filter(name=address)
+                            for result in Results:
+                                result.info = json.dumps(port_details, indent=4)
+                                result.lastdate = LastDate
+                                result.save()
+                            logger.debug("vdInTarget model direct update")
                 else:
                     logger.debug("error in getting output")
         
