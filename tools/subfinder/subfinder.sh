@@ -5,7 +5,8 @@ function debugsub {
 }
 . /opt/asf/tools/subfinder/subfinder.hack
 DSTAMP=$(date '+%Y%m%d%H%M')
-IMAGE="m4ch1n3s/subfinder"
+IMAGE="projectdiscovery/subfinder"
+docker pull $IMAGE:latest
 INSTALLED_PATH="/opt/asf"
 OUTPUT_DIR_PATH="$INSTALLED_PATH/toolsrun/discovery"
 WDIR=`pwd`
@@ -21,16 +22,27 @@ debugsub "Creating lock file"
 echo > "${OUTPUT_DIR_PATH}/.lock"
 debugsub "Extracting from system app.input using parse_tools"
 cd /opt/asf/frontend/asfui/
-. bin/activate
+# . bin/activate
 python3 manage.py parse_tools --parser=subfinder.input --output="${OUTPUT_DIR_PATH}/history/${DSTAMP}_targets.txt"
-rm -v "${OUTPUT_DIR_PATH}/targets.txt"
-ln -s "${OUTPUT_DIR_PATH}/history/${DSTAMP}_targets.txt" "${OUTPUT_DIR_PATH}/targets.txt"
+#rm -v "${OUTPUT_DIR_PATH}/targets.txt"
+#ln -s "${OUTPUT_DIR_PATH}/history/${DSTAMP}_targets.txt" "${OUTPUT_DIR_PATH}/targets.txt"
+cp "${OUTPUT_DIR_PATH}/history/${DSTAMP}_targets.txt" "${INSTALLED_PATH}/jobs/targets.txt"
 #docker pull $IMAGE
 echo "Executing.."
 #Lock
 debugsub "Running subfinder"
-echo "subfinder -dL ${OUTPUT_DIR_PATH}/targets.txt -all -cs -oJ -o ${OUTPUT_DIR_PATH}/report.txt 2>&1 | tee -a ${OUTPUT_DIR_PATH}/history/${DSTAMP}_discovery.log | grep -e \"^{\" | python3 manage.py parse_tools --parser=subfinder.output --input=stdin 2>&1 | tee -a ${OUTPUT_DIR_PATH}/history/${DSTAMP}_run.log"
-if HOME=/root subfinder -dL ${OUTPUT_DIR_PATH}/targets.txt -all -cs -oJ -o ${OUTPUT_DIR_PATH}/report.txt 2>&1 | tee -a ${OUTPUT_DIR_PATH}/history/${DSTAMP}_discovery.log | grep -e "^{" | python3 manage.py parse_tools --parser=subfinder.output --input=stdin 2>&1 | tee -a ${OUTPUT_DIR_PATH}/history/${DSTAMP}_run.log
+# to install go in container
+# wget https://golang.org/dl/go1.19.5.linux-amd64.tar.gz
+# tar -C /usr/local -xzf go1.19.5.linux-amd64.tar.gz
+# export PATH=$PATH:/usr/local/go/bin
+# go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
+# installed in /go/bin/subfinder
+echo "docker run --rm -i -v ${HOST_FOLDER}/jobs:/var $IMAGE -dL /var/targets.txt -all -cs -oJ -o ${OUTPUT_DIR_PATH}/report.txt 2>&1 | tee -a ${OUTPUT_DIR_PATH}/history/${DSTAMP}_discovery.log | grep -e "^{" | python3 manage.py parse_tools --parser=subfinder.output --input=stdin 2>&1 | tee -a ${OUTPUT_DIR_PATH}/history/${DSTAMP}_run.log"
+# if HOME=/root subfinder -dL ${OUTPUT_DIR_PATH}/targets.txt -all -cs -oJ -o ${OUTPUT_DIR_PATH}/report.txt 2>&1 | tee -a ${OUTPUT_DIR_PATH}/history/${DSTAMP}_discovery.log | grep -e "^{" | python3 manage.py parse_tools --parser=subfinder.output --input=stdin 2>&1 | tee -a ${OUTPUT_DIR_PATH}/history/${DSTAMP}_run.log
+# docker run subfinder is not able to read file input
+# docker run -i $IMAGE -dL -<${OUTPUT_DIR_PATH}/targets.txt -all -cs -oJ -o -<${OUTPUT_DIR_PATH}/report.txt
+# running docker inside docker requires to pass host folder instead of the folder in the container invoking the folder
+if docker run --rm -i -v ${HOST_FOLDER}/jobs:/var $IMAGE -dL /var/targets.txt -all -cs -oJ -o ${OUTPUT_DIR_PATH}/report.txt 2>&1 | tee -a ${OUTPUT_DIR_PATH}/history/${DSTAMP}_discovery.log | grep -e "^{" | python3 manage.py parse_tools --parser=subfinder.output --input=stdin 2>&1 | tee -a ${OUTPUT_DIR_PATH}/history/${DSTAMP}_run.log
 then 
 	echo "done"
 	debugsub "Success running"

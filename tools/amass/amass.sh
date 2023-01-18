@@ -27,7 +27,7 @@ if  docker run -v $OUTPUT_DIR_PATH:/.config/amass/ $IMAGE enum -brute -ip -src -
 	rm /home/amass/reports/amass-latest.txt
 	ln -s /home/amass/reports/amass-$1-$DSTAMP.txt /home/amass/reports/amass-latest.txt
 	cd /opt/asf/frontend/asfui/
-	. bin/activate
+	# . bin/activate
 	python3 manage.py amassparse
 else
 	echo "Error running Amass from docker, please check"

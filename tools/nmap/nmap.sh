@@ -1,5 +1,5 @@
 #!/bin/bash
-INSTALLED_PATH =/opt/asf
+INSTALLED_PATH=/opt/asf
 OUTPUT_FOLDER="$INSTALLED_PATH/toolsrun/nmap/reports"
 INPUT_FOLDER="$INSTALLED_PATH/toolsrun/nmap"
 cd $INSTALLED_PATH/frontend/asfui

@@ -9,9 +9,11 @@ services:
       #  DOCKER_BUILDKIT: 1
       #context: ./
       #dockerfile: Dockerfile
+    environment:
+      - HOST_FOLDER=$PWD
     ports:
       - 8080:8080
     volumes:
-      - ./jobs:/opt/asf/jobs
+      - ${PWD}/jobs:/opt/asf/jobs
       - /var/run/docker.sock:/var/run/docker.sock
       - /usr/bin/docker:/usr/bin/docker

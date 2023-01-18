@@ -1,6 +1,9 @@
 FROM python:3.11.0-slim-bullseye@sha256:1cd45c5dad845af18d71745c017325725dc979571c1bbe625b67e6051533716c as base
 #FROM 3.11.1-alpine:3.17 as base
 FROM base as build
+# make sure to pass the host folder to the container as the same is used to mount volume in the container invoked inside
+# container
+ENV HOST_FOLDER $HOST_FOLDER
 # copy source and install dependencies
 RUN mkdir -p /opt/asf
 RUN mkdir -p /opt/asf/frontend

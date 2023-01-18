@@ -21,6 +21,11 @@ class vdTarget(models.Model):
     tag = models.CharField(max_length=250, default='DEFAULT')
     owner = models.CharField(max_length=512, default='')
     metadata = models.TextField(default="")
+    assetcriticality = models.CharField(max_length=50, default='medium') # critical, high, medium, low
+    internetexposed = models.CharField(max_length=50, default='False') # how to determine? TODO may be when wazuh is integrated
+    criticalfindings = models.IntegerField(default=0) # with exploits
+    highfindings = models.IntegerField(default=0) # with exploits
+    info = models.TextField(default="") # store the nmap scan or other freeform text
     
     def __str__(self):
         return self.name.lower()
