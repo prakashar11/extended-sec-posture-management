@@ -60,6 +60,7 @@ class vdResult(models.Model):
     info = models.CharField(max_length=250, default="")
     owner = models.CharField(max_length=512, default='')
     metadata = models.TextField(default="")
+    engine = models.CharField(max_length=50, default="network")
     
     def __str__(self):
         return self.name.lower()

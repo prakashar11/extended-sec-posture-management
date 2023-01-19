@@ -3,16 +3,22 @@ INSTALLED_PATH=/opt/asf
 OUTPUT_FOLDER="$INSTALLED_PATH/toolsrun/nmap/reports"
 INPUT_FOLDER="$INSTALLED_PATH/toolsrun/nmap"
 cd $INSTALLED_PATH/frontend/asfui
+REGEX=$1
+echo $REGEX
 # . bin/activate
-python3 manage.py nmap_input --input targets --output "$INPUT_FOLDER/targets.txt"
-python3 manage.py nmap_input --input amass --output "$INPUT_FOLDER/targets_amass.txt"
-if ! test -e "$INPUT_FOLDER/targets.txt" || ! test -e "$INPUT_FOLDER/targets_amass.txt"
+# this may need to be controlled through a flag - either to start scanning target input by user or
+# to scan the domains discovered by amass/subfinder
+# python3 manage.py nmap_input --input targets --filter "$REGEX" --output "$INPUT_FOLDER/targets.txt"
+python3 manage.py nmap_input --input amass --filter "$REGEX" --output "$INPUT_FOLDER/targets_amass.txt"
+python3 manage.py nmap_input --input subfinder --filter "$REGEX" --output "$INPUT_FOLDER/targets_subfinder.txt"
+if ! test -e "$INPUT_FOLDER/targets.txt" || ! test -e "$INPUT_FOLDER/targets_amass.txt" || ! test -e "$INPUT_FOLDER/targets_subfinder.txt"
 then 
-	echo "No inputs bro"
+	echo "No input targets detected"
 	exit 1
 fi
 mkdir -p "$OUTPUT_FOLDER"
 > "$INSTALLED_PATH/toolsrun/nmap/reports/nmap.lock"
+cat "$INPUT_FOLDER/targets_subfinder.txt" >> "$INPUT_FOLDER/targets.txt"
 cat "$INPUT_FOLDER/targets_amass.txt" >> "$INPUT_FOLDER/targets.txt"
 
 #This line is for override and debug

@@ -460,21 +460,21 @@ def amass(request):
         context['running'] = False
 #start amass
     def amass_start():
-        #subprocess.Popen(["nohup", "/opt/asf/tools/amass/amass.sh"])
-        subprocess.Popen(["nohup", "/opt/asf/tools/subfinder/subfinder.sh"])
+        subprocess.Popen(["/bin/bash", "/opt/asf/tools/amass/amass.sh"])
+        # subprocess.Popen(["nohup", "/opt/asf/tools/subfinder/subfinder.sh"])
         context['running'] = True
 
 #stop amass
     def amass_stop():
         sys.stdout.write("Stopping Amass")
-        #subprocess.Popen(["killall", "amass.sh"])
-        subprocess.Popen(["killall", "subfinder.sh"])
+        subprocess.Popen(["killall", "amass.sh"])
+        # subprocess.Popen(["killall", "subfinder.sh"])
         #if path.exists("/home/amass/reports/amass.txt"):
         if path.exists("/opt/asf/toolsrun/discovery/.lock"):
-            #os.remove("/home/amass/reports/amass.txt")
-            os.remove("/opt/asf/toolsrun/discovery/.lock")
-        #subprocess.Popen(["killall", "amass"])
-        subprocess.Popen(["killall", "subfinder"])
+            os.remove("/home/amass/reports/amass.txt")
+            # os.remove("/opt/asf/toolsrun/discovery/.lock")
+        subprocess.Popen(["killall", "amass"])
+        # subprocess.Popen(["killall", "subfinder"])
         context['running'] = False
         return
     
@@ -507,8 +507,8 @@ def amass(request):
         AmassService.readTimerFromRequest(request)
         AmassService.config['Unit']['Description'] = "Attack Surface Framework Amass Service Files"
         AmassService.config['Unit']['Requires'] = "docker.service"
-        #AmassService.config['Service']['ExecStart'] = "/opt/asf/tools/amass/amass.sh" 
-        AmassService.config['Service']['ExecStart'] = "/opt/asf/tools/subfinder/subfinder.sh"
+        AmassService.config['Service']['ExecStart'] = "/opt/asf/tools/amass/amass.sh" 
+        # AmassService.config['Service']['ExecStart'] = "/opt/asf/tools/subfinder/subfinder.sh"
         AmassService.write()
         return True
     
@@ -533,7 +533,8 @@ def amass(request):
         slicer = pager(context, page, page_size, context['query_count'])
         context['query_results'] = context['query_results'][slicer]
     else:
-        context['query_results'] = vdResult.objects.all()
+        # context['query_results'] = vdResult.objects.all()
+        context['query_results'] = vdResult.objects.filter(engine='amass')
         context['query_count'] = context['query_results'].count()
         slicer = pager(context, page, page_size, context['query_count'])
         context['query_results'] = context['query_results'][slicer]
@@ -547,44 +548,138 @@ def amass(request):
     html_template = loader.get_template( 'vd-amass.html' )
     return HttpResponse(html_template.render(context, request))
 
-@login_required(login_url="/login/")    
-def portscan(request):
+@login_required(login_url="/login/")     
+def subfinder(request):
     context = {}
-    context['segment'] = 'vd-portscan'
-    context['query_results'] = "Ninguno"
-    ensure_dirs("/opt/asf/toolsrun/nmap/reports")
+    context['segment'] = 'vd-subfinder'
+    ensure_dirs("/opt/asf/toolsrun/subfinder/reports")
+
+    if path.isfile("/opt/asf/toolsrun/discovery/.lock"):
+        context['running'] = True
+    else:
+        context['running'] = False
+#start subfinder
+    def subfinder_start():
+        subprocess.Popen(["/bin/bash", "/opt/asf/tools/subfinder/subfinder.sh"])
+        context['running'] = True
+
+#stop subfinder
+    def subfinder_stop():
+        sys.stdout.write("Stopping Subfinder")
+        subprocess.Popen(["killall", "subfinder.sh"])
+        if path.exists("/opt/asf/toolsrun/discovery/.lock"):
+            os.remove("/opt/asf/toolsrun/discovery/.lock")
+        subprocess.Popen(["killall", "subfinder"])
+        context['running'] = False
+        return
+    
+    def subfinder_new():
+        discovery_new(request,context,autodetectType,delta)
+                
+    def subfinder_delete():
+        return discovery_delete(request,context,autodetectType,delta)
+   
+    def subfinder_total_purge():
+        debug("Total Purge: Subfinder Host\n")
+        try:
+            HostName = vdResult.objects.all()
+            HostName.delete()
+        except Exception as e:
+            sys.stdout.write(str(e))
+        return
+
+                
+    def subfinder_partial_load():
+        sys.stderr.write("Calling partial load from view, excecuting amassparse\n")
+        try:
+            call_command('amassparse')
+        except Exception as e:
+            sys.stderr.write(str(e)+"\n")
+        return
+
+    def subfinder_schedule():
+        AmassService = sdService({"name":"vdamass"})
+        AmassService.readTimerFromRequest(request)
+        AmassService.config['Unit']['Description'] = "Attack Surface Framework Amass Service Files"
+        AmassService.config['Unit']['Requires'] = "docker.service"
+        AmassService.config['Service']['ExecStart'] = "/opt/asf/tools/subfinder/subfinder.sh"
+        AmassService.write()
+        return True
+    
+#Same dirty solution
+    action={'new': subfinder_new, 'start':subfinder_start, 'stop':subfinder_stop, 'delete':subfinder_delete, 'total_purge':subfinder_total_purge, 'partial_load':subfinder_partial_load, 'schedule':subfinder_schedule}
+    if 'subfinder_action' in request.POST:
+        if request.POST['subfinder_action'] in action:
+            debug("Excecuting :"+request.POST['subfinder_action'])
+            action[request.POST['subfinder_action']]()
     page = 0
     page_size = GENERAL_PAGE_SIZE
     if 'page' in request.POST:
         page = int(request.POST['page'])
-    
-    ResultsExclude = ""
-    if 'results_exclude' in request.POST:
-        ResultsExclude=request.POST['results_exclude']
-        context['results_exclude'] = ResultsExclude
-
-    if 'results_search' in request.POST:
-        ResultsSearch=request.POST['results_search']
-        #context['query_results'] = vdServices.objects.filter(info__regex=ResultsSearch)
-        context['query_results'] = search(ResultsSearch, 'services', ResultsExclude)
-        context['query_count'] = context['query_results'].count() 
+        
+    if 'domain_search' in request.POST:
+        DomainRegexpFilter=request.POST['domain_search']
+        context['domain_search'] = DomainRegexpFilter
+        # context['query_results'] = vdResult.objects.filter(name__regex=DomainRegexpFilter)
+        context['query_results'] = search(DomainRegexpFilter, 'subfinder')
+        context['query_count'] = context['query_results'].count()
         #context['query_count'] = len(context['query_results'])
         slicer = pager(context, page, page_size, context['query_count'])
         context['query_results'] = context['query_results'][slicer]
-        context['results_search'] = ResultsSearch
-        context['show_save'] = True
     else:
-        context['query_results'] = vdServices.objects.all()
+        # context['query_results'] = vdResult.objects.all()
+        context['query_results'] = vdResult.objects.filter(engine='subfinder')
         context['query_count'] = context['query_results'].count()
         slicer = pager(context, page, page_size, context['query_count'])
         context['query_results'] = context['query_results'][slicer]
-        context['show_save'] = False
-    context['saved_regexp'] = vdRegExp.objects.all()[0:3000]
+    
+    #Here we add data from the previous system timer, and pass it to the view via context dictionary
+    AmassService = sdService({"name":"vdamass"})
+    AmassService.read()
+    AmassService.setContext(context)
+
+    
+    html_template = loader.get_template( 'vd-subfinder.html' )
+    return HttpResponse(html_template.render(context, request))
+
+@login_required(login_url="/login/")    
+def portscan(request):
+    context = {}
+    context['segment'] = 'vd-portscan'
+    # context['query_results'] = "Ninguno"
+    # ensure_dirs("/opt/asf/toolsrun/nmap/reports")
+    # page = 0
+    # page_size = GENERAL_PAGE_SIZE
+    # if 'page' in request.POST:
+    #     page = int(request.POST['page'])
+    
+    # ResultsExclude = ""
+    # if 'results_exclude' in request.POST:
+    #     ResultsExclude=request.POST['results_exclude']
+    #     context['results_exclude'] = ResultsExclude
+
+    # if 'results_search' in request.POST:
+    #     ResultsSearch=request.POST['results_search']
+    #     #context['query_results'] = vdServices.objects.filter(info__regex=ResultsSearch)
+    #     context['query_results'] = search(ResultsSearch, 'services', ResultsExclude)
+    #     context['query_count'] = context['query_results'].count() 
+    #     #context['query_count'] = len(context['query_results'])
+    #     slicer = pager(context, page, page_size, context['query_count'])
+    #     context['query_results'] = context['query_results'][slicer]
+    #     context['results_search'] = ResultsSearch
+    #     context['show_save'] = True
+    # else:
+    #     context['query_results'] = vdServices.objects.all()
+    #     context['query_count'] = context['query_results'].count()
+    #     slicer = pager(context, page, page_size, context['query_count'])
+    #     context['query_results'] = context['query_results'][slicer]
+    #     context['show_save'] = False
+    # context['saved_regexp'] = vdRegExp.objects.all()[0:3000]
         
-    if path.isfile("/opt/asf/toolsrun/nmap/reports/nmap.lock"):
-        context['running'] = True
-    else:
-        context['running'] = False
+    # if path.isfile("/opt/asf/toolsrun/nmap/reports/nmap.lock"):
+    #     context['running'] = True
+    # else:
+    #     context['running'] = False
         
     def host_picture(HostWithServices):
         NEW_HWS = []
@@ -604,9 +699,17 @@ def portscan(request):
 #start Nmap
     def nmap_start():
         # subprocess.Popen(["nohup", "/opt/asf/tools/nmap/nmap.sh"])
+        logger.debug(f"request {request.POST}")
+        nmap_regexp = ''
+        if 'nmap_regexp' in request.POST:
+            jre = request.POST['nmap_regexp']
+            qre = vdRegExp.objects.filter(id = jre).first()
+            nmap_regexp = qre.regexp
+            logger.debug(f"nmap_regexp {nmap_regexp}")
+            # nmap_regexp = request.POST['nmap_regexp']
         nmap_path = os.path.join(TOOL_SCRIPT_DIR, 'nmap/nmap.sh')
         logger.debug(f"nmap path {nmap_path}")
-        subprocess.Popen(["/bin/bash", nmap_path])
+        subprocess.Popen(["/bin/bash", nmap_path, str(nmap_regexp)])
         context['running'] = True
 
 #stop Nmap
@@ -671,11 +774,52 @@ def portscan(request):
     if 'nmap_action' in request.POST:
         if request.POST['nmap_action'] in action:
             action[request.POST['nmap_action']]()   
-    context['query_results'] = host_picture(context['query_results'])
+    # context['query_results'] = "Ninguno"
+    
+    if not 'query_results' in context:
+        context['query_results'] = ""
+
+    ensure_dirs("/opt/asf/toolsrun/nmap/reports")
+    page = 0
+    page_size = GENERAL_PAGE_SIZE
+    if 'page' in request.POST:
+        page = int(request.POST['page'])
+    
     #Here we add data from the previous system timer, and pass it to the view via context dictionary
     ExNmap = sdService({"name":"vdexnmap"})
     ExNmap.read()
     ExNmap.setContext(context)
+    
+    ResultsExclude = ""
+    if 'results_exclude' in request.POST:
+        ResultsExclude=request.POST['results_exclude']
+        context['results_exclude'] = ResultsExclude
+
+    if 'results_search' in request.POST:
+        ResultsSearch=request.POST['results_search']
+        #context['query_results'] = vdServices.objects.filter(info__regex=ResultsSearch)
+        context['query_results'] = search(ResultsSearch, 'services', ResultsExclude)
+        context['query_count'] = context['query_results'].count() 
+        #context['query_count'] = len(context['query_results'])
+        slicer = pager(context, page, page_size, context['query_count'])
+        context['query_results'] = context['query_results'][slicer]
+        context['results_search'] = ResultsSearch
+        context['show_save'] = True
+    else:
+        context['query_results'] = vdServices.objects.all()
+        context['query_count'] = context['query_results'].count()
+        slicer = pager(context, page, page_size, context['query_count'])
+        context['query_results'] = context['query_results'][slicer]
+        context['show_save'] = False
+    context['saved_regexp'] = vdRegExp.objects.all()[0:3000]
+        
+    if path.isfile("/opt/asf/toolsrun/nmap/reports/nmap.lock"):
+        context['running'] = True
+    else:
+        context['running'] = False
+
+    context['query_results'] = host_picture(context['query_results'])
+    
     html_template = loader.get_template( 'vd-portscan.html' )
     return HttpResponse(html_template.render(context, request))
 
@@ -740,9 +884,17 @@ def inportscan(request):
 #         sys.stdout.write("Staring Nmap for Internal Networks")
 #         FileTargets.close()
         #subprocess.Popen(["nohup", "/opt/asf/tools/nmap/nmap.int.sh"])
+        logger.debug(f"{request.POST}")
+        nmap_regexp = ''
+        if 'nmap_regexp' in request.POST:
+            jre = request.POST['nmap_regexp']
+            qre = vdRegExp.objects.filter(id = jre).first()
+            nmap_regexp = qre.regexp
+            logger.debug(f"nmap_regexp {nmap_regexp}")
         nmap_path = os.path.join(TOOL_SCRIPT_DIR, 'nmap/nmap.int.sh')
         logger.debug(f"nmap path {nmap_path}")
-        subprocess.Popen(["/bin/bash", nmap_path])
+        subprocess.Popen(["/bin/bash", nmap_path, str(nmap_regexp)])
+        # subprocess.Popen(["/bin/bash", nmap_path, str(nmap_regexp)])
         #os.system("nohup /opt/asf/tools/nmap/nmap.sh")
         context['running'] = True
 

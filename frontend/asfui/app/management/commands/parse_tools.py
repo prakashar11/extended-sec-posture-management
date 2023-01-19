@@ -119,7 +119,7 @@ def parser_subfinder_output(kwargs):
         for source in Finding['sources']:
             Tag=Tag+"["+source+"]"
         MDT,MDATA=get_metadata(Finding['host'])
-        Result = vdResult(name=Finding['host'], tag=Tag, info=Finding['input'], type=autodetectType(Finding['host']), owner=MDT['owner'], metadata=MDATA)
+        Result = vdResult(name=Finding['host'], tag=Tag, info=Finding['input'], type=autodetectType(Finding['host']), owner=MDT['owner'], metadata=MDATA, engine='subfinder')
         NewData = True
         
         try:

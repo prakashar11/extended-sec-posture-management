@@ -60,11 +60,21 @@ Start Nmap Scan
   <form class="navbar-form" action="vd-in-portscan" method="post">
     {%csrf_token%}
  <input type="hidden" name="nmap_action" value="start">
+            <td>
+            Full scan Filter:
+             <select name='nmap_regexp' class="form-control">
+{% for item in saved_regexp %}
+             <option value="{{ item.id }}">{{ item.name }}/{{ item.info }}</option>
+{% endfor %}
+             </select>
+            </td>
+            <td>
                 <button type="submit" class="btn btn-white btn-round btn-just-icon" rel="tooltip" title="" data-original-title="Start Full Enumeration">
                   <i class="material-icons">play_arrow</i>
                   <div class="ripple-container"></div>
                 </button> 
-                </form></td>
+                </form>
+              </td>
   <td>
     <form class="navbar-form" action="vd-in-portscan" method="post">
       {%csrf_token%}

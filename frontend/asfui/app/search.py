@@ -99,7 +99,7 @@ def search(RegExp, Model_NAME, ExcludeRegExp = ""):
     def search_amass(RegExp, ExcludeRegExp):
         sys.stderr.write("[SEARCH]: Searching in any host from amass\n")
         results = vdResult.objects.none()
-        partial = vdResult.objects.filter(name__regex=RegExp)
+        partial = vdResult.objects.filter(name__regex=RegExp, engine='amass')
         if ExcludeRegExp != "":
             partial = partial.exclude(name__regex=RegExp)
         results = merge_results(partial, results)
@@ -109,6 +109,19 @@ def search(RegExp, Model_NAME, ExcludeRegExp = ""):
         results = merge_results(partial, results)        
         return results
     
+    def search_subfinder(RegExp, ExcludeRegExp):
+        sys.stderr.write("[SEARCH]: Searching in any host from subfinder\n")
+        results = vdResult.objects.none()
+        partial = vdResult.objects.filter(name__regex=RegExp, engine='subfinder')
+        if ExcludeRegExp != "":
+            partial = partial.exclude(name__regex=RegExp)
+        results = merge_results(partial, results)
+        partial = vdResult.objects.filter(metadata__regex=RegExp)
+        if ExcludeRegExp != "":
+            partial = partial.exclude(metadata__regex=RegExp)
+        results = merge_results(partial, results)        
+        return results
+
     def search_targets(RegExp, ExcludeRegExp):
         return search_targets_by_model(RegExp, ExcludeRegExp, vdTarget)
 
@@ -143,7 +156,7 @@ def search(RegExp, Model_NAME, ExcludeRegExp = ""):
         results = merge_results(partial, results)        
         return results
 
-    action={'services':search_services, 'amass':search_amass, 'service':search_services, 'inservices':search_inservices, 'targets':search_targets, 'intargets':search_intargets, 'nuclei':search_nuclei}
+    action={'services':search_services, 'amass':search_amass, 'service':search_services, 'inservices':search_inservices, 'targets':search_targets, 'intargets':search_intargets, 'nuclei':search_nuclei, 'subfinder': search_subfinder}
     if Model_NAME in action:
         return action[Model_NAME](RegExp, ExcludeRegExp)
     

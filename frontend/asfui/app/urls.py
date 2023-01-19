@@ -10,6 +10,7 @@ urlpatterns = [
     #External
     path('vd-targets',views.targets),
     path('vd-amass', views.amass),
+    path('vd-subfinder', views.subfinder),
     path('vd-portscan', views.portscan),
     path('vd-redteam', views.redteam),
     path('vd-nuclei', views.nuclei),

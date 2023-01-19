@@ -8,6 +8,7 @@ import os
 import netaddr
 from cProfile import label
 from app.tools import autodetectType
+from app.search import *
 import logging
 
 logger = logging.getLogger(__name__)
@@ -24,9 +25,10 @@ def debug(text):
 class Command(BaseCommand):
     def add_arguments(self, parser):
         #This single module reads the input file and converts it accordigly 
-        parser.add_argument('--input', help='Input vector for nmap: amass|external|internal', default='amass')
+        parser.add_argument('--input', help='Input vector for nmap: amass|subfinder|external|internal', default='amass')
         parser.add_argument('--output', help='The destination file', default='stderr')
         parser.add_argument('--debug', help='Print verbose data', action='store_true', default=False)
+        parser.add_argument('--filter', help='RegEX', default='')
 
 #     def add_arguments(self, parser):
 #         parser.add_argument("report-file", nargs='+')
@@ -41,6 +43,7 @@ class Command(BaseCommand):
             print(item)
             
         PARSER_INPUT = kwargs['input']
+        regex = kwargs['filter']
         global PARSER_DEBUG
         PARSER_DEBUG = kwargs['debug']
         #app.views.PARSER_DEBUG = PARSER_DEBUG
@@ -51,9 +54,28 @@ class Command(BaseCommand):
         
         Targets = []
         if PARSER_INPUT == "inservices" or PARSER_INPUT == "internal" or PARSER_INPUT == "intarget" or PARSER_INPUT == "intargets":
-            Targets=vdInTarget.objects.all()
+            if regex:
+                logger.debug(f"regex received {regex}")
+                Targets=search(regex, 'intargets')
+                logger.debug(f"returned Targets {Targets}")
+            else:
+                Targets=vdInTarget.objects.all()
         if PARSER_INPUT == "amass":
-            Targets=vdResult.objects.all()
+            # Targets=vdResult.objects.all()
+            if regex:
+                logger.debug(f"regex received {regex}")
+                Targets=search(regex, 'amass')
+                logger.debug(f"returned Targets {Targets}")
+            else:
+                Targets=vdResult.objects.all()
+        if PARSER_INPUT == "subfinder":
+            # Targets=vdResult.objects.all()
+            if regex:
+                logger.debug(f"regex received {regex}")
+                Targets=search(regex, 'subfinder')
+                logger.debug(f"returned Targets {Targets}")
+            else:
+                Targets=vdResult.objects.all()
         if PARSER_INPUT == "services" or PARSER_INPUT == "external" or PARSER_INPUT == "target" or PARSER_INPUT == "targets":
             Targets=vdTarget.objects.all()
         for target in Targets:

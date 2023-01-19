@@ -4,8 +4,10 @@ INSTALLED_PATH="/opt/asf"
 OUTPUT_FOLDER="$INSTALLED_PATH/toolsrun/nmap.int/reports"
 INPUT_FOLDER="$INSTALLED_PATH/toolsrun/nmap.int"
 cd $INSTALLED_PATH/frontend/asfui
+REGEX=$1
+echo $REGEX
 # . bin/activate
-python3 manage.py nmap_input --input intargets --output "$INPUT_FOLDER/targets.txt"
+python3 manage.py nmap_input --input intargets --filter "$REGEX" --output "$INPUT_FOLDER/targets.txt"
 if ! test -e "$INPUT_FOLDER/targets.txt"
 then 
 	echo "No input"

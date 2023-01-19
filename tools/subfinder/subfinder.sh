@@ -47,10 +47,12 @@ then
 	echo "done"
 	debugsub "Success running"
 	rm -v "${OUTPUT_DIR_PATH}/.lock"
+	rm -v "${INSTALLED_PATH}/jobs/targets.txt"
 else
 	echo "Error running subfinder from docker, please check"
 	debugsub "Subfinder error while running"
 	rm -v "${OUTPUT_DIR_PATH}/.lock"
+	rm -v "${INSTALLED_PATH}/jobs/targets.txt"
 	exit 1
 fi
 cd "$WDIR"

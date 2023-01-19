@@ -42,12 +42,22 @@ Service waiting
                 </button>
   {% else %}
  <input type="hidden" name="nmap_action" value="start">
+            <td>
+            Full scan Filter:
+             <select name='nmap_regexp' class="form-control">
+{% for item in saved_regexp %}
+             <option value="{{ item.id }}">{{ item.name }}/{{ item.info }}</option>
+{% endfor %}
+             </select>
+            </td>
+            <td>
                 <button type="submit" class="btn btn-white btn-round btn-just-icon" rel="tooltip" title="" data-original-title="Start">
                   <i class="material-icons">play_arrow</i>
                   <div class="ripple-container"></div>
                 </button> 
  {% endif %}
               </div></span>
+            </td>
 </form>
 </td><td>
 			<span onclick="row = document.getElementById('systemd.timer'); if (row.style.display=='none') {row.style.display='';}else{row.style.display='none';}" style="display: inline;">
