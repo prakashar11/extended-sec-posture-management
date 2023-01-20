@@ -47,7 +47,20 @@ Service waiting
  {% endif %}
                </div></span>
 </form>
-</td><td>
+</td>
+<td>
+  <b>Active domain discovery</b> 
+    <form class="navbar-form" action="vd-subfinder" method="post" style="display: inline;">
+      {%csrf_token%}
+    <input type="hidden" name="subfinder_action" value="activedomains">
+                  <button type="submit" class="btn btn-white btn-round btn-just-icon" rel="tooltip" title="" data-original-title="Active domain discovery">
+                    <i class="material-icons">refresh status</i>
+                  <div class="ripple-container"></div>
+                </button> 
+    </form>
+  </td>
+
+<td>
  <form class="navbar-form" action="vd-export" method="post" style="display: inline;">
  			{%csrf_token%}
              <span class="bmd-form-group"><div class="input-group no-border">
@@ -221,7 +234,7 @@ Service waiting
                           Last Report
                         </th>
                         <th>
-                          Count
+                          Active
                         </th>
                         <th>
                           Owner
@@ -249,7 +262,7 @@ Service waiting
                             {{ item.lastdate }}
                           </td>
                           <td class="text-primary">
-                            {{ item.itemcount }}
+                            {{ item.active }}
                           </td>
                           <td class="text-primary">
                           <span onclick="row = document.getElementById('metadata-{{ item.id }}'); if (row.style.display=='none') {row.style.display='';}else{row.style.display='none';}" style="display: inline;">
@@ -273,6 +286,7 @@ Service waiting
                         <tr>
                         <td colspan=10 id="metadata-{{ item.id }}" style="display: none;">
                         {{ item.metadata }}
+                        {{ item.info }}
                         </td>
                         </tr>
 

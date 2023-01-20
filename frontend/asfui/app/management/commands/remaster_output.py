@@ -195,9 +195,9 @@ def parser_nuclei_http_store(PARSER_INPUT, PARSER_OUTPUT):
         # creating alert finding for the first time
         if count < 1:
             if alert_sub_test_id:
-                Nfinding = vdNucleiResult(name=host, firstdate=datetime.now().replace(tzinfo=tz), vulnerability=description, engine='Nuclei', level=level, type=autodetectType(host), bumpdate=datetime.now().replace(tzinfo=tz), detectiondate=datetime.now().replace(tzinfo=tz), scope=scope, status="open", metadata=reference, alert_test_id=json_line['template-id'], alert_sub_test_id=alert_sub_test_id)
+                Nfinding = vdNucleiResult(name=host, firstdate=datetime.now().replace(tzinfo=tz), vulnerability=description, engine='Nuclei', level=level, type=autodetectType(host), bumpdate=datetime.now().replace(tzinfo=tz), detectiondate=datetime.now().replace(tzinfo=tz), scope=scope, status="open", metadata=reference, alert_test_id=json_line['template-id'], alert_sub_test_id=alert_sub_test_id, info=json_line)
             else:
-                Nfinding = vdNucleiResult(name=host, firstdate=datetime.now().replace(tzinfo=tz), vulnerability=description, engine='Nuclei', level=level, type=autodetectType(host), bumpdate=datetime.now().replace(tzinfo=tz), detectiondate=datetime.now().replace(tzinfo=tz), scope=scope, status="open", metadata=reference, alert_test_id=json_line['template-id'])
+                Nfinding = vdNucleiResult(name=host, firstdate=datetime.now().replace(tzinfo=tz), vulnerability=description, engine='Nuclei', level=level, type=autodetectType(host), bumpdate=datetime.now().replace(tzinfo=tz), detectiondate=datetime.now().replace(tzinfo=tz), scope=scope, status="open", metadata=reference, alert_test_id=json_line['template-id'], info=json_line)
             Nfinding.save()
         
         # check whether for the received alert id there is a closed finding
@@ -468,6 +468,8 @@ def parser_nuclei_onlyalert(PARSER_INPUT, PARSER_OUTPUT):
 action={'default':parser_default, 'patator.ssh':parser_patator_ssh, 'patator.rdp':parser_patator_rdp, 'patator.ftp':parser_patator_ftp, 'patator.telnet':parser_patator_telnet, 'hydra.ftp':parser_hydra_ftp, 'hydra.telnet':parser_hydra_telnet, 'nuclei.http':parser_nuclei_http, 'nuclei.network':parser_nuclei_network, 'nuclei':parser_nuclei, 'nuclei.onlyalert':parser_nuclei_onlyalert, 'nuclei.waf':parser_nuclei_waf, 'nuclei.http.store': parser_nuclei_http_store}
 
 def parseLines(PARSER_INPUT, JobInput, parser):
+    # set output to domain result
+    PARSER_OUTPUT = vdResult
     if JobInput == "inservices":
         PARSER_OUTPUT = vdInServices
     if JobInput == "services":

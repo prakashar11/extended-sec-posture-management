@@ -606,8 +606,13 @@ def subfinder(request):
         AmassService.write()
         return True
     
+    def active_domains_discover():
+        logger.debug(f"to call httpx to find active domains and update vdResult.active")
+        subprocess.Popen(["/bin/bash", "/opt/asf/tools/httpx/httpx.sh"])
+
 #Same dirty solution
-    action={'new': subfinder_new, 'start':subfinder_start, 'stop':subfinder_stop, 'delete':subfinder_delete, 'total_purge':subfinder_total_purge, 'partial_load':subfinder_partial_load, 'schedule':subfinder_schedule}
+    action={'new': subfinder_new, 'start':subfinder_start, 'stop':subfinder_stop, 'delete':subfinder_delete, 'total_purge':subfinder_total_purge, 'partial_load':subfinder_partial_load, 'schedule':subfinder_schedule, 'activedomains': active_domains_discover}
+
     if 'subfinder_action' in request.POST:
         if request.POST['subfinder_action'] in action:
             debug("Excecuting :"+request.POST['subfinder_action'])

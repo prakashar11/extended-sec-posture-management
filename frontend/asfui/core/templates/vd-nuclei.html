@@ -359,13 +359,14 @@
                         <tr>
                         <td colspan=10 id="metadata-{{ item.id }}" style="display: none;">
                         <span onclick="row = document.getElementById('metadata-{{ item.id }}'); if (row.style.display=='none') {row.style.display='';}else{row.style.display='none';}" style="text-align: left;">
-                        Metadata: {{ item.metadata }}<br>
-                        Sub Assessment Id: {{ item.alert_sub_test_id }}<br>
+                        <!-- Metadata: {{ item.metadata }}<br> -->
+                        <!-- Sub Assessment Id: {{ item.alert_sub_test_id }}<br> -->
                         Tools engine: {{ item.engine }}<br>
                         Alert status: {{ item.status }}<br>
+                        Detailed finding: {{ item.info }} <br>
                         </span>
                         </td>
-                        <td colspan=10 id="alertaction-{{ item.id }}" style="display: none;">
+                        <td colspan=10 id="alertaction-{{ item.id }}" style="display: none;" style="text-align: left;">
                           <span onclick="row = document.getElementById('alertaction-{{ item.id }}'); if (row.style.display=='none') {row.style.display='';}else{row.style.display='none';}" style="text-align: right;">
                             <form method="post" action="vd-nuclei" style="display: inline;">
                               {%csrf_token%}

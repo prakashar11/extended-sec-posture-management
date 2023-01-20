@@ -49,7 +49,8 @@ class vdInTarget(models.Model):
         return self.name.lower()
 
 class vdResult(models.Model):
-    name = models.CharField(max_length=150, unique=True)
+    # name = models.CharField(max_length=150, unique=True)
+    name = models.CharField(max_length=150)
     type = models.CharField(max_length=30, default="DOMAIN")
     source = models.CharField(max_length=60, default="")
     ipv4 = models.CharField(max_length=20, default="")
@@ -57,10 +58,12 @@ class vdResult(models.Model):
     lastdate = models.DateTimeField(auto_now=True)
     itemcount = models.IntegerField(default=0)
     tag = models.CharField(max_length=250, default="DEFAULT")
-    info = models.CharField(max_length=250, default="")
+    info = models.CharField(max_length=512, default="")
     owner = models.CharField(max_length=512, default='')
-    metadata = models.TextField(default="")
+    metadata = models.TextField(max_length=512, default="")
     engine = models.CharField(max_length=50, default="network")
+    active = models.CharField(max_length=20, default="False")
+    url = models.CharField(max_length=150, default="")
     
     def __str__(self):
         return self.name.lower()
@@ -101,7 +104,7 @@ class vdNucleiResult(models.Model):
     #Other
     itemcount = models.IntegerField(default=0)
     tag = models.CharField(max_length=250, default="DEFAULT")
-    info = models.TextField(default="")
+    info = models.TextField(max_length=512, default="")
     owner = models.CharField(max_length=512, default='')
     metadata = models.TextField(default="")
     class Meta:

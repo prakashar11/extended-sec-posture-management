@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "inside nuclei start"
+echo "inside nuclei start $1"
 # load KUBE_FLAG variable
 KUBE_VARS_FILE=/opt/asf/.kube_vars
 . $KUBE_VARS_FILE

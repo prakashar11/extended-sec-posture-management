@@ -156,7 +156,9 @@ class Command(BaseCommand):
             PARSER_DEBUG = True
             debug("Parser:"+kwargs['parser']+" not found in action declaration:"+str(action)+"\n")
             sys.exit()
-            
+
+        jobs_input = ''
+
         if kwargs['input'] != "stdin":
             if "JobID:" in kwargs['input']:
                 JobID = kwargs['input'].split("JobID:")[1]
@@ -166,6 +168,7 @@ class Command(BaseCommand):
                 try:
                     Job = vdJob.objects.filter(id = JobID)[0]
                     logger.debug(f"job details from model {Job.regexp} {Job.input}, {Job.exclude}")
+                    jobs_input = Job.input
                     HostsFromModel = search(Job.regexp, Job.input, Job.exclude)
                     if not path.exists(JOB_FOLDER):
                         os.makedirs(JOB_FOLDER)
@@ -175,6 +178,9 @@ class Command(BaseCommand):
                         for Host in HostsFromModel:
                             INPUT_FILE.write("Host: " +Host.ipv4+" ("+Host.name+")\tPorts: ///////\n")
                             HOSTS_COUNTER = HOSTS_COUNTER + 1
+                    elif Job.input == 'active_domains':
+                        for Domains in HostsFromModel:
+                            INPUT_FILE.write(Domains.url+"\n")
                     else:
                         for HostWithServices in HostsFromModel:
                             INPUT_FILE.write("Host: "+HostWithServices.ipv4+" ("+HostWithServices.name+")\tPorts: "+HostWithServices.full_ports.rstrip('\n')+"\n")
@@ -201,7 +207,11 @@ class Command(BaseCommand):
                 PARSER_OUTPUT.close()
                 break
             debug(line+"\n")
-            parser_objects = parseLine(line, kwargs['parser'])
+            if jobs_input == 'active_domains':
+                logger.debug(f"output domain {line}")
+                parser_objects.append(line)
+            else:
+                parser_objects = parseLine(line, kwargs['parser'])
             #debug("Received Line Content:"+line)
             for parser_object in parser_objects:
                 debug(parser_object+"\n")

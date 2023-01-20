@@ -18,6 +18,13 @@ from app.tools import *
 from app.nuclei import *
 from datetime import date, datetime, timedelta
 
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+consoleHandler = logging.StreamHandler()
+logger.addHandler(consoleHandler)
+
 def parser_default(PARSER_INPUT, PARSER_OUTPUT):
     return
 
@@ -106,7 +113,31 @@ def parser_subfinder_input(kwargs):
     debug("Dumped "+str(counter)+" domains from external targets..\n")
     FileTargets.flush()
     FileTargets.close()
-    
+
+def parser_httpx_output(kwargs):
+    logger.debug(f"parser httpx output")
+    report=sys.stdin
+    lines=0    
+    if kwargs['input']!='stdin':
+        report=open(kwargs['input'],'r')
+    # it is a json output
+    for line in report:
+        logger.debug(f"line read {line}")
+        if not 'timestamp' in line:
+            logger.debug(f"skip line")
+            continue
+        else:
+            json_line = json.loads(line)
+            host = json_line['input']
+            url = json_line['url']
+            Result = vdResult.objects.filter(name=host)
+            for result in Result:
+                result.active = "True"
+                result.url = url
+                result.info = json_line
+                result.save()
+    logger.debug(f"completed parsing httpx output")
+
 def parser_subfinder_output(kwargs):
     report=sys.stdin
     lines=0    
@@ -155,7 +186,7 @@ def parser_subfinder_output(kwargs):
     return
         
 #Here is the global declaration of parsers, functions can be duplicated
-action={'default':parser_default, 'nuclei.waf.rc':parser_nuclei_waf_rc, 'subfinder.input':parser_subfinder_input, 'subfinder.output':parser_subfinder_output, 'wpscan.output':parser_wpscan_output}
+action={'default':parser_default, 'nuclei.waf.rc':parser_nuclei_waf_rc, 'subfinder.input':parser_subfinder_input, 'subfinder.output':parser_subfinder_output, 'wpscan.output':parser_wpscan_output, 'httpx.output': parser_httpx_output}
 
 def getJobID(kwargs):
     if "JobID:" in kwargs['output']:
@@ -199,7 +230,7 @@ class Command(BaseCommand):
         #This single module reads the input file and convert it into 
         parser.add_argument('--input', help='The input file/folder according to parser, if not provided stdin is used', default='stdin')
         parser.add_argument('--output', help='The output JobID:ID/String according to parser', default='error')
-        parser.add_argument('--parser', help='The parser algorithm [default|nuclei{.waf{.rc}}|subfinder(.input,.output)|wpscan.(output)]', default='default')
+        parser.add_argument('--parser', help='The parser algorithm [default|nuclei{.waf{.rc}}|subfinder(.input,.output)|wpscan.(output)|httpx.output]', default='default')
         parser.add_argument('--debug', help='Print verbose data', action='store_true', default=False)
         
     def handle(self, *args, **kwargs):        

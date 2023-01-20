@@ -122,6 +122,19 @@ def search(RegExp, Model_NAME, ExcludeRegExp = ""):
         results = merge_results(partial, results)        
         return results
 
+    def search_active_domains(RegExp, ExcludeRegExp):
+        sys.stderr.write("[SEARCH]: Searching active domains\n")
+        results = vdResult.objects.none()
+        partial = vdResult.objects.filter(name__regex=RegExp, active='True')
+        if ExcludeRegExp != "":
+            partial = partial.exclude(name__regex=RegExp)
+        results = merge_results(partial, results)
+        partial = vdResult.objects.filter(metadata__regex=RegExp)
+        if ExcludeRegExp != "":
+            partial = partial.exclude(metadata__regex=RegExp)
+        results = merge_results(partial, results)        
+        return results
+
     def search_targets(RegExp, ExcludeRegExp):
         return search_targets_by_model(RegExp, ExcludeRegExp, vdTarget)
 
@@ -156,7 +169,7 @@ def search(RegExp, Model_NAME, ExcludeRegExp = ""):
         results = merge_results(partial, results)        
         return results
 
-    action={'services':search_services, 'amass':search_amass, 'service':search_services, 'inservices':search_inservices, 'targets':search_targets, 'intargets':search_intargets, 'nuclei':search_nuclei, 'subfinder': search_subfinder}
+    action={'services':search_services, 'amass':search_amass, 'service':search_services, 'inservices':search_inservices, 'targets':search_targets, 'intargets':search_intargets, 'nuclei':search_nuclei, 'subfinder': search_subfinder, 'active_domains': search_active_domains}
     if Model_NAME in action:
         return action[Model_NAME](RegExp, ExcludeRegExp)
     
