@@ -62,7 +62,7 @@ class vdResult(models.Model):
     owner = models.CharField(max_length=512, default='')
     metadata = models.TextField(max_length=512, default="")
     engine = models.CharField(max_length=50, default="network")
-    active = models.CharField(max_length=20, default="False")
+    active = models.CharField(max_length=20, default="No")
     url = models.CharField(max_length=150, default="")
     
     def __str__(self):

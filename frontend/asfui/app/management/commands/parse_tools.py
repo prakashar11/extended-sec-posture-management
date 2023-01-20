@@ -132,7 +132,7 @@ def parser_httpx_output(kwargs):
             url = json_line['url']
             Result = vdResult.objects.filter(name=host)
             for result in Result:
-                result.active = "True"
+                result.active = "Yes"
                 result.url = url
                 result.info = json_line
                 result.save()

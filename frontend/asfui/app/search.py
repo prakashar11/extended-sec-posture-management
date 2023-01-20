@@ -125,7 +125,7 @@ def search(RegExp, Model_NAME, ExcludeRegExp = ""):
     def search_active_domains(RegExp, ExcludeRegExp):
         sys.stderr.write("[SEARCH]: Searching active domains\n")
         results = vdResult.objects.none()
-        partial = vdResult.objects.filter(name__regex=RegExp, active='True')
+        partial = vdResult.objects.filter(name__regex=RegExp, active='Yes')
         if ExcludeRegExp != "":
             partial = partial.exclude(name__regex=RegExp)
         results = merge_results(partial, results)
