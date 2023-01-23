@@ -10,7 +10,7 @@ from django.core.management import call_command
 from datetime import date, datetime
 import time
 
-from .models import vdTarget, vdInTarget, vdResult, vdServices, vdInServices, vdRegExp, vdJob, vdNucleiResult
+from .models import vdTarget, vdInTarget, vdResult, vdServices, vdInServices, vdRegExp, vdJob, vdNucleiResult, vdNucleiTemplate
 
 from os import path
 import pathlib
@@ -20,7 +20,7 @@ import os
 import re
 import csv
 import shutil
-import json
+import json, yaml
 import hashlib
 from app.tools import *
 from app.search import *
@@ -204,22 +204,128 @@ def nucleitemplates(request):
     context['segment'] = 'vd-nuclei-templates'
     global PARSER_DEBUG
     PARSER_DEBUG=True
+
 #Set NucleiTemplates
-    def nuclei_blacklist(context):
-        debug(context)
+    def nuclei_blacklist():
+        logger.debug(request.POST)
         return
+    
+    def refresh_nuclei_template_model():
+        folder='/opt/asf/toolsrun/nuclei-templates/'
+        for p in NUCLEI_TEMPLATE_EXTENSIONS_PATTERNS:
+            pathlist = Path(folder).glob(p)
+            for path in pathlist:
+                filename = str(path)
+                nucleifn=filename.replace(folder, "")
+                with open(filename) as f:                    
+                    data = yaml.safe_load(f) # dict returned
+                    try:
+                        # assume it is a new entry
+                        severity = '' if not 'severity' in data['info'] else data['info']['severity']
+                        Nentry = vdNucleiTemplate(template_id=data['id'], info=data, name=data['info']['name'], severity=severity, template=nucleifn)
+                        Nentry.save()
+                    except:
+                        # existing template; refresh the severity, name and info
+                        Nentry = vdNucleiTemplate.objects.filter(name=data['id'])
+                        Nentry.info = data
+                        severity = '' if not 'severity' in data['info'] else data['info']['severity']
+                        Nentry.severity = severity
+                        Nentry.save()
+        return
+
+    def nuclei_get_template_file():
+        folder='/opt/asf/toolsrun/nuclei-templates/'
+        file_content_read = None
+        template_file = request.POST['template_file']
+        for p in NUCLEI_TEMPLATE_EXTENSIONS_PATTERNS:
+            pathlist = Path(folder).glob(p)
+            for path in pathlist:
+                filename = str(path)
+                nucleifn=filename.replace(folder, "")
+                # logger.debug(f"file names {template_file} {nucleifn}")
+                if template_file == nucleifn:
+                    logger.debug(f"file matched for {template_file}")
+                    with open(filename) as f:                    
+                        # return the yaml file
+                        data = yaml.safe_load(f) # dict returned
+                        # file_content_read = json.dumps(data, indent = 2)
+                        file_content_read = data
+        return file_content_read
+    
+    def search_templates(RegExp, ExcludeRegExp):
+        logger.debug(f"Searching Nuclei templates\n")
+        results = vdNucleiTemplate.objects.none()
+        partial = vdNucleiTemplate.objects.filter(name__iregex=RegExp)
+        if ExcludeRegExp != "":
+            partial = partial.exclude(name__iregex=ExcludeRegExp)
+        results = results | partial
+        # results = merge_results(partial, results)
+        # logger.debug(f"name returned {results}")
+        partial = vdNucleiTemplate.objects.filter(template__iregex=RegExp)
+        if ExcludeRegExp != "":
+            partial = partial.exclude(template__iregex=ExcludeRegExp)
+        results = results | partial
+        # results = merge_results(partial, results)
+        # logger.debug(f"template returned {results}")
+        partial = vdNucleiTemplate.objects.filter(template_id__iregex=RegExp)
+        if ExcludeRegExp != "":
+            partial = partial.exclude(template_id__iregex=ExcludeRegExp)
+        # results = merge_results(partial, results)
+        results = results | partial
+        # logger.debug(f"template_id returned {results}")
+        # partial = vdNucleiTemplate.objects.filter(info__iregex=RegExp)
+        # if ExcludeRegExp != "":
+        #     partial = partial.exclude(info__iregex=RegExp)
+        # results = merge_results(partial, results)
+        # results = results | partial
+        return results
+
 #Dirty solution since python lacks of switch case :\
-    action={'blacklist':nuclei_blacklist}
+    action={'blacklist':nuclei_blacklist, 'refresh': refresh_nuclei_template_model}
+    file_content_read = None
+    logger.debug(f"{request.POST}")
     if 'nuclei_action' in request.POST:
         if request.POST['nuclei_action'] in action:
-            action[request.POST['nuclei_action']](request.POST)
-    nuclei_templates=get_nuclei_templates()
-    context['query_results']=get_nuclei_templates_4view(nuclei_templates)
-#     context['nuclei_filter_hidden']=mark_safe(get_nuclei_filter_hidden(request.POST))
-    debug(request.POST)
-    set_nuclei_templates_4bl(request.POST, nuclei_templates)
+            action[request.POST['nuclei_action']]()
+
+    if 'template_file' in request.POST:
+            # file_content_read = nuclei_get_template_file()
+            file_content_read = vdNucleiTemplate.objects.filter(template=request.POST['template_file'])[0].info
+    if file_content_read:
+        context['file_content'] = {'file': request.POST['template_file'], 'content': file_content_read}
+
+    page = 0
+    page_size = GENERAL_PAGE_SIZE
+    if 'page' in request.POST:
+        page = int(request.POST['page'])
+    
+    ResultsExclude = ""
+    if 'results_exclude' in request.POST:
+        ResultsExclude=request.POST['results_exclude']
+        context['results_exclude'] = ResultsExclude
+
+    if 'results_search' in request.POST:
+        ResultsSearch=request.POST['results_search']
+        context['query_results'] = search_templates(ResultsSearch, ResultsExclude)
+        # context['query_count'] = context['query_results'].count()
+        context['query_count'] = len(context['query_results'])
+        slicer = pager(context, page, page_size, context['query_count'])
+        context['query_results'] = context['query_results'][slicer]
+        context['results_search'] = ResultsSearch
+        context['show_save'] = True
+    else:
+        # nuclei_templates=get_nuclei_templates()
+        # context['query_results']=get_nuclei_templates_4view(nuclei_templates)
+        # set_nuclei_templates_4bl(request.POST, nuclei_templates)
+        # context['query_count'] = context['query_results'].count()
+        context['query_results'] = vdNucleiTemplate.objects.all()  
+        context['query_count'] = len(context['query_results'])
+        slicer = pager(context, page, page_size, context['query_count'])
+        logger.debug(f"{slicer} {len(context['query_results'])}")
+        context['query_results'] = context['query_results'][slicer]
+
     html_template = loader.get_template( 'vd-nuclei-templates.html' )
-    return HttpResponse(html_template.render(context, request))    
+    return HttpResponse(html_template.render(context, request))  
 
 @login_required(login_url="/login/")
 def targets(request):

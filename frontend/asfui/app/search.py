@@ -114,11 +114,11 @@ def search(RegExp, Model_NAME, ExcludeRegExp = ""):
         results = vdResult.objects.none()
         partial = vdResult.objects.filter(name__regex=RegExp, engine='subfinder')
         if ExcludeRegExp != "":
-            partial = partial.exclude(name__regex=RegExp)
+            partial = partial.exclude(name__regex=ExcludeRegExp)
         results = merge_results(partial, results)
         partial = vdResult.objects.filter(metadata__regex=RegExp)
         if ExcludeRegExp != "":
-            partial = partial.exclude(metadata__regex=RegExp)
+            partial = partial.exclude(metadata__regex=ExcludeRegExp)
         results = merge_results(partial, results)        
         return results
 
@@ -127,11 +127,11 @@ def search(RegExp, Model_NAME, ExcludeRegExp = ""):
         results = vdResult.objects.none()
         partial = vdResult.objects.filter(name__regex=RegExp, active='Yes')
         if ExcludeRegExp != "":
-            partial = partial.exclude(name__regex=RegExp)
+            partial = partial.exclude(name__regex=ExcludeRegExp)
         results = merge_results(partial, results)
         partial = vdResult.objects.filter(metadata__regex=RegExp)
         if ExcludeRegExp != "":
-            partial = partial.exclude(metadata__regex=RegExp)
+            partial = partial.exclude(metadata__regex=ExcludeRegExp)
         results = merge_results(partial, results)        
         return results
 
@@ -147,11 +147,11 @@ def search(RegExp, Model_NAME, ExcludeRegExp = ""):
         results = vdTargetModel.objects.none()
         partial = vdTargetModel.objects.filter(name__regex=RegExp)
         if ExcludeRegExp != "":
-            partial = partial.exclude(name__regex=RegExp)
+            partial = partial.exclude(name__regex=ExcludeRegExp)
         results = merge_results(partial, results)
         partial = vdTargetModel.objects.filter(metadata__regex=RegExp)
         if ExcludeRegExp != "":
-            partial = partial.exclude(metadata__regex=RegExp)
+            partial = partial.exclude(metadata__regex=ExcludeRegExp)
         results = merge_results(partial, results)
         return results
     
@@ -161,11 +161,11 @@ def search(RegExp, Model_NAME, ExcludeRegExp = ""):
         partial = vdNucleiResult.objects.filter(full_uri__regex=RegExp)
         partial = merge_results(partial, vdNucleiResult.objects.filter(vulnerability__regex=RegExp))
         if ExcludeRegExp != "":
-            partial = partial.exclude(full_uri__regex=RegExp)
+            partial = partial.exclude(full_uri__regex=ExcludeRegExp)
         results = merge_results(partial, results)
         partial = vdNucleiResult.objects.filter(metadata__regex=RegExp)
         if ExcludeRegExp != "":
-            partial = partial.exclude(metadata__regex=RegExp)
+            partial = partial.exclude(metadata__regex=ExcludeRegExp)
         results = merge_results(partial, results)        
         return results
 

@@ -190,3 +190,13 @@ class vdJob(models.Model):
     info = models.TextField(default="")
     def __str__(self):
         return self.name.lower()
+
+class vdNucleiTemplate(models.Model):
+    name = models.CharField(max_length=250, default="")
+    template_id =  models.CharField(max_length=150, default="")
+    severity = models.CharField(max_length=32, default="")
+    template = models.CharField(max_length=250, default="")
+    enabled = models.CharField(max_length=10, default="No")
+    info = models.TextField(max_length=2048, default="")
+    def __str__(self):
+        return self.name.lower()

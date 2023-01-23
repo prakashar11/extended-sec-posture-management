@@ -18,6 +18,21 @@
   background-color: orange;
 }
 </style>
+<tr>
+<b> Refresh Nuclei Templates</b>
+<td>
+  <form class="navbar-form" action="vd-nuclei-templates" method="post">
+    {%csrf_token%}
+ <input type="hidden" name="nuclei_action" value="refresh">
+ <button type="submit" class="btn btn-white btn-round btn-just-icon"  rel="tooltip" title="Reresh Nuclei templates data" data-original-title="Reresh Nuclei templates">
+   <i class="material-icons">refresh status</i>
+   <div class="ripple-container"></div>
+ </button>
+ </form>
+</td>
+</tr>
+
+<!-- <tr>
 <b>Nuclei Templates Blacklist:</b>Multiple files allowed as blacklist
 <form class="navbar-form" action="vd-export" method="post" style="display: inline;">
 	{%csrf_token%}
@@ -29,13 +44,93 @@
           </button>
           </div></span>
 </form>
+</tr> -->
+
+<tr>
+<b> Search in Nuclei templates </b>
+ <table width="100%">
+ <tr>
+ <td>
+ <form class="navbar-form" action="vd-nuclei-templates" method="post" style="display: inline;">
+ 			{%csrf_token%}
+             <span class="bmd-form-group"><div class="input-group no-border">
+             Include: &nbsp;  &nbsp;<input type="text" name='results_search' value="{{ results_search }}" class="form-control" placeholder="New regex query">
+             Exclude:  &nbsp;  &nbsp;<input type="text" name='results_exclude' value="{{ results_exclude }}" class="form-control" placeholder="Exclude regex query">
+            <input type="hidden" name="nuclei_action" value="filter">
+             <button type="submit" class="btn btn-white btn-round btn-just-icon" rel="tooltip" title="" data-original-title="Search">
+             <i class="material-icons">search</i>
+             <!-- <div class="ripple-container"></div> -->
+             </button>
+             </div></span>
+</form>
+<!-- {% if show_save %}
+Save Your Search:
+ <form class="navbar-form" action="vd-nuclei-templates" method="post" style="display: inline;">
+ 			{%csrf_token%}
+             <span class="bmd-form-group"><div class="input-group no-border">
+             <input type="hidden" name='regexp_query' value="{{ results_search }}" class="form-control">
+             <input type="hidden" name='regexp_exclude' value="{{ results_exclude }}" class="form-control">
+             <input type="text" name='regexp_name' value="" class="form-control" placeholder="Title for your RegExp">
+             <input type="text" name='regexp_info' value="" class="form-control" placeholder="Description">
+			 <input type="hidden" name="nuclei_action" value="save_regexp">
+             <button type="submit" class="btn btn-white btn-round btn-just-icon" rel="tooltip" title="" data-original-title="Save search">
+             <i class="material-icons">save</i>
+             <div class="ripple-container"></div>
+             </button>
+             </div></span>
+</form>
+{% endif %} -->
+</td>
+</tr>
+</table>
+</tr>
+
+<a id="templatelist"></a>
+<table width="100%">
+<tr>
+<td>
+ Objects: [{{ query_count }}]
+ </td>
+<td>
+<form class="navbar-form" action="vd-nuclei-templates#templatelist" method="post" style="display: inline;">
+ 			{%csrf_token%}
+             <span class="bmd-form-group"><div class="input-group no-border">
+             <input type="hidden" name='results_search' value="{{ results_search }}">
+			 <!-- <input type="hidden" name="nuclei_action" value="filter"> -->
+			 <input type="hidden" name="page" value="{{ query_page_prev }}">
+             <button type="submit" class="btn btn-white btn-round btn-just-icon"  rel="tooltip" title="" data-original-title="Previous page">
+             <i class="material-icons">skip_previous</i>
+             <div class="ripple-container"></div>
+             </button>
+             </div></span>
+</form>
+</td>
+<td>
+ Page [{{ query_page }}]
+</td>
+<td>
+<form class="navbar-form" action="vd-nuclei-templates#templatelist" method="post" style="display: inline;">
+ 			{%csrf_token%}
+             <span class="bmd-form-group"><div class="input-group no-border">
+             <input type="hidden" name='results_search' value="{{ results_search }}">
+			 <!-- <input type="hidden" name="nuclei_action" value="filter"> -->
+			 <input type="hidden" name="page" value="{{ query_page_next }}">
+             <button type="submit" class="btn btn-white btn-round btn-just-icon" rel="tooltip" title="" data-original-title="Next page">
+             <i class="material-icons">skip_next</i>
+             <div class="ripple-container"></div>
+             </button>
+             </div></span>
+</form>
+</td>
+</tr>
+</table>
 
  <!-- Main Form to save the whole list -->
-                       <form method="post" action="vd-nuclei-templates" style="display: inline;">
+                       <!-- <form method="post" action="vd-nuclei-templates" style="display: inline;">
                        {%csrf_token%}
                          <input type="hidden" name="name" value="{{ item.name }}">
                          <input type="hidden" name="vulnerability" value="{{ item.vulnerability }}">
-                         <input type="hidden" name="nuclei_action" value="blacklist">
+                         <input type="hidden" name="nuclei_action" value="blacklist"> -->
 <!-- The form will continue at the bottom -->
 
         <div class="row">
@@ -49,30 +144,59 @@
                     <table class="table">
                       <thead class="text-primary">
                         <th>
-                          ID
+                          Template ID
                         </th>
                         <th>
-                          YAML File
+                          Description
                         </th>
                         <th style="text-align: center;">
-                          Blacklist?
+                          Enabled
+                        </th>
+                        <th>
+                          Get YAML file
                         </th>
                       </thead>
                       <tbody>
  {% for item in query_results %}
                         <tr>
                           <td>
-                            {{ item.id }}
+                            {{ item.template_id }}
                           </td>
                           <td>
-                            {{ item.template }}
+                            <span onclick="row = document.getElementById('metadata-{{ item.template }}'); if (row.style.display=='none') {row.style.display='';}else{row.style.display='none';}" style="display: inline;">
+                              {{ item.name }}
+                            </span>
                           </td>
                           <td align="center">
                             <input type="checkbox" name="{{ item.template }}" {{ item.enabled }}>
-                          </td>                          
-                        </tr>
-
-{% endfor %}
+                          </td>  
+                          <td colspan=10 id="metadata-{{ item.template }}">
+                              <form class="navbar-form" action="vd-nuclei-templates" method="post" style="display: inline;">
+                                {%csrf_token%}
+                                <span class="bmd-form-group"><div class="input-group no-border">
+                                    <input type="hidden" name='template_file' value="{{ item.template }}" class="form-control">
+                                    <input type="hidden" name="page" value="{{ query_page }}">
+                                    <input type="hidden" name='results_search' value="{{ results_search }}" class="form-control">
+                                    <input type="hidden" name='results_exclude' value="{{ results_exclude }}" class="form-control">
+                                        <button type="submit" class="btn btn-white btn-round btn-just-icon"  rel="tooltip" title={{ item.template }} data-original-title="Get template">
+                                        <i class="material-icons">assignment</i>
+                                        </button>
+                                </div></span>
+                              </form>
+                            </td>
+                            </tr>
+                            {% if file_content %}
+                            {% if file_content.file == item.template %}
+                            <tr>
+                              <td colspan=4 id="filecontent-{{ item.template }}" style="text-align: left;">
+                                <pre style="white-space: pre-wrap;"></pre>
+                                  {{ file_content | linebreaks }}
+                              </pre>
+                              </td>
+                            </tr>
+                            {% endif %}
+                            {% endif %}
+{% endfor %} 
                       </tbody>
                     </table>
                   </div>

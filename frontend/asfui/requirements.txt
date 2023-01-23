@@ -14,3 +14,4 @@ webscreenshot
 netaddr
 pymetasploit3
 psutil
+pyyaml
