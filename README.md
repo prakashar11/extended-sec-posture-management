@@ -1,4 +1,4 @@
-# XSPM Extended Attach Surface based Security Posture Management
+# XSPM Extended Attack Surface based Security Posture Management
 
 ## Overview
 
@@ -49,9 +49,9 @@ Note: this is the dev Django webserver based deployment; nginx and gunicorn are 
 ## Operations Notes
 
 - Discovery - Module that runs the Amass process to discover publicly exposed assets, feel free to create your configuration file to setup your API keys https://github.com/OWASP/Amass/blob/master/examples/config.ini; same goes for subfinder
-- Initiate active target discovery for IP address with wildcard (without this discovery list, nmap enumeration won't work)
-- Targets enumeration; quick (nmap ping sweep) or full enumeration setup regex if required
-- Red team - Input to select 'internal enumeration' and select module & save job; can take targets that were enumerated through ping sweep
+- Initiate active asset discovery for IP address with wildcard (without this discovery list, nmap enumeration won't work)
+- Assets enumeration; quick (nmap ping sweep) or full enumeration setup regex if required
+- Red team - Input to select 'internal enumeration' and select module & save job; can take assets that were enumerated through ping sweep
 - Start job
 
 Security (TODO)
