@@ -169,10 +169,10 @@ Save Your Search:
                             <input type="checkbox" name="{{ item.template }}" {{ item.enabled }}>
                           </td>  
                           <td colspan=10 id="metadata-{{ item.template }}">
-                              <form class="navbar-form" action="vd-nuclei-templates" method="post" style="display: inline;">
+                              <form onsubmit="return scroll_position()" class="navbar-form" action="vd-nuclei-templates" method="post" style="display: inline;">
                                 {%csrf_token%}
                                 <span class="bmd-form-group"><div class="input-group no-border">
-                                    <input type="hidden" name='template_file' value="{{ item.template }}" class="form-control">
+                                    <input type="hidden" id="template_file" name='template_file' value="{{ item.template }}" class="form-control">
                                     <input type="hidden" name="page" value="{{ query_page }}">
                                     <input type="hidden" name='results_search' value="{{ results_search }}" class="form-control">
                                     <input type="hidden" name='results_exclude' value="{{ results_exclude }}" class="form-control">
@@ -211,4 +211,33 @@ Save Your Search:
 {% endblock content %}
 
 <!-- Specific Page JS goes HERE  -->
-{% block javascripts %}{% endblock javascripts %}
+{% block javascripts %}
+
+<script>
+
+  function scroll_position() {
+      // console.log("form submit")
+      var file_name = $('#template_file').val()
+      // console.log(file_name)
+      // make sure the form is related to displaying file content
+      if (file_name) {
+        // console.log("inside if")
+        // var pos = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop
+        var pos = $(this).scrollTop()
+        localStorage.setItem('my-scroll-pos', pos)
+        // console.log(pos)
+      }
+    return true; // need to continue with form submission, if returned false, it stops from post
+  }
+
+  $(document).ready(function (){
+    var pos = localStorage.getItem('my-scroll-pos')
+    // console.log(pos)
+    if (pos)
+      $(document).scrollTop(pos)
+      // window.scrollTo(0, pos)
+      localStorage.removeItem('my-scroll-pos'); // to clear local storage
+  });
+
+</script>
+{% endblock javascripts %}

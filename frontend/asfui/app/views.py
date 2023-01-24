@@ -280,6 +280,10 @@ def nucleitemplates(request):
         # results = results | partial
         return results
 
+    # def is_ajax(request):
+    #     return request.headers.get('x-requested-with') == 'XMLHttpRequest'
+
+    logger.debug(f"{request.POST}")
 #Dirty solution since python lacks of switch case :\
     action={'blacklist':nuclei_blacklist, 'refresh': refresh_nuclei_template_model}
     file_content_read = None
