@@ -162,14 +162,17 @@ Save Your Search:
                           </td>
                           <td>
                             <span onclick="row = document.getElementById('metadata-{{ item.template }}'); if (row.style.display=='none') {row.style.display='';}else{row.style.display='none';}" style="display: inline;">
+                            <!-- <a id="file_content" href="#" onclick="row = document.getElementById('metadata-{{ item.template }}'); if (row.style.display=='none') {row.style.display='';}else{row.style.display='none';}" style="display: inline;"> -->
                               {{ item.name }}
                             </span>
+                            <!-- </a> -->
                           </td>
                           <td align="center">
                             <input type="checkbox" name="{{ item.template }}" {{ item.enabled }}>
-                          </td>  
+                          </td>
                           <td colspan=10 id="metadata-{{ item.template }}">
-                              <form class="navbar-form" action="vd-nuclei-templates" method="post" style="display: inline;">
+                              <!-- <form class="navbar-form" id="task_form" method="post" style="display: inline;"> -->
+                                <form class="navbar-form" action="vd-nuclei-templates" method="post" style="display: inline;">
                                 {%csrf_token%}
                                 <span class="bmd-form-group"><div class="input-group no-border">
                                     <input type="hidden" name='template_file' value="{{ item.template }}" class="form-control">
@@ -181,6 +184,7 @@ Save Your Search:
                                         </button>
                                 </div></span>
                               </form>
+                              <!-- </a> -->
                             </td>
                             </tr>
                             {% if file_content %}
@@ -211,4 +215,44 @@ Save Your Search:
 {% endblock content %}
 
 <!-- Specific Page JS goes HERE  -->
-{% block javascripts %}{% endblock javascripts %}
+{% block javascripts %}
+<!-- <script type="text/javascript">
+  $(document).on('submit','#task-form',function(e){
+      e.preventDefault();
+      $.ajax({
+          type:'POST',
+          url:'{% url "vd-nuclei-templates" %}',
+          data:
+          {
+              page:$("#page").val(),
+              template_file:$("#template_file").val(),
+              results_search:$("#results_search").val(),
+              results_exclude:$("#results_exclude").val(),
+              csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
+          },
+          success:function(){
+                alert('Saved');
+                  }
+          })
+      });
+  </script> -->
+
+  <!-- $('#file_content').click(function (e) {
+      event.preventDefault() -->
+      <!-- var scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop -->
+      <!-- var pos  = $(window).pageYOffset
+      localStorage.setItem('my-scroll-pos', pos)
+      alert(pos)
+    });
+
+  $(document).ready(function (){
+    var pos = localStorage.getItem('my-scroll-pos')
+    alert(pos)
+    if (pos)
+      $(document).scrollTop(pos)
+      $(window).scrollTo(0, pos)
+  });
+
+  </scrip> -->
+
+{% endblock javascripts %}
