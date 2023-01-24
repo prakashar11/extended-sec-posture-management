@@ -6,6 +6,8 @@ For organizations tracking cost-to-attack as a security metric, it is critical t
 
 This repo forked from https://github.com/vmware-labs/attack-surface-framework and has made improvements for streamlined usage by organizations who are short staffed in InfoSec team.
 
+Roadmap: https://github.com/users/prakashar11/projects/1
+
 ## Tenets
 
 1. Inventory of assets (IP addresses, domains, code repo, SaaS applications) through automated discovery
