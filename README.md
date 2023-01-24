@@ -1,23 +1,40 @@
 # XSPM Extended Attach Surface based Security Posture Management
-# (Updated Attack Surface Framework)
 
 ## Overview
 
-ASF aims to protect organizations acting as an attack surface watchdog, provided an “Object” which might be a: Domain, IP address or CIDR (Internal or External), ASF will discover assets/subdomains, enumerate their ports and services, track deltas and serve as a continuous and flexible attacking and alerting framework leveraging an additional layer of support against 0 day vulnerabilities with publicly available POCs.
+For organizations tracking cost-to-attack as a security metric, it is critical to make sure different digital assets are continuously assessed to make sure the known exploits for vulnerabilities are addressed before a threat actor takes advantage of the same. In order to do that combining internal & external attack surface monitoring with automated assessment tools, can be helpful. New acronym coined by the security vendor industry for the same is, XSPM!
 
-## Motivation
+This repo forked from https://github.com/vmware-labs/attack-surface-framework and has made improvements for streamlined usage by organizations who are short staffed in InfoSec team.
 
-The lack of support and flexibility to automate discovery of dynamic assets and their associated vulnerabilities through continuous scanning or exploitation in a single pane of glass was the driving force in the creation of ASF, the current solutions are restricted by the technology or the program they are built for, we wanted a solution that is scalable as well as utilizes popular Open Source security tools for handling a full vulnerability lifecycle.
+## Tenets
 
-ASF is a breed of open source projects leveraging a powerful arsenal of tools wrapped in a single pane of glass on top of a GUI. ASF architectural diagram illustrated below:
+1. Inventory of assets (IP addresses, domains, code repo, SaaS applications) through automated discovery
+2. Keep track of the active assets
+3. Leverage assessment tools from https://github.com/projectdiscovery for assessing assets - for vulnerabilities in software packages, configuration; also use MITRE ATT&CK surface test tools
+4. CISA KEV (known exploitable vulnerabilities catalog) as an input to priorities assessment
+5. Automated opening or closing of findings generated from the assessment tools against an asset; use assement test id used by the assessment tool to determine whether a finding is closed/to be reopened
+5. Target users: short staffed InfoSec teams which can perform assessment on a weekly/bi-weekly basis and take follow up remediations
 
-![Architecture](images/architecture.png)
+## Workflow
 
-## Supported deployment models 
+1. Build docker image
+2. `http://127.0.0.1:8080` - For ASF - user:youruser pass:yourpass (provided in initial setup)
 
-Supports 2 deployment models - docker and Kali linux.
+### External facing assets
 
-### Using docker
+1. Discover active domains
+2. Perform assessment
+3. Review findings - mark false positive; review reopened finding
+
+TODO: SaaS applications configuration check e.g., Google Workspace configuration CIS benchmark assessment
+
+### Internal assets
+1. Auto discover of active assets with IP address; discovery based on specific IP or CIDR range or wildcard
+2. Inventory enumeration
+3. Perform assessment
+4. Review findings
+
+## Using docker
 
 1. Clone repo
 2. dc-build.sh - builds the image
@@ -25,125 +42,21 @@ Supports 2 deployment models - docker and Kali linux.
 4. http://127.0.0.1:8080
 5. Note: default superuser created with admin credentials; needs change 
 
-Note: this is the dev Django webserver based deployment; nginx and gunicorn are yet to be enabled. Also shares same unix socket as that of host. Graylog is not used for storing logs and alerts.
+Note: this is the dev Django webserver based deployment; nginx and gunicorn are yet to be enabled. Also shares same unix socket as that of host.
 
+## Operations Notes
 
-## Operations
+- Discovery - Module that runs the Amass process to discover publicly exposed assets, feel free to create your configuration file to setup your API keys https://github.com/OWASP/Amass/blob/master/examples/config.ini; same goes for subfinder
+- Initiate active target discovery for IP address with wildcard (without this discovery list, nmap enumeration won't work)
+- Targets enumeration; quick (nmap ping sweep) or full enumeration setup regex if required
+- Red team - Input to select 'internal enumeration' and select module & save job; can take targets that were enumerated through ping sweep
+- Start job
 
-ASF has two scopes:
-
-A) External: For your publicly exposed assets.
-
-B) Internal: Assets in your corporate network.
-
-For the External scope, the flow goes through four basic steps: 
-
-A.1 Targets - Here is where you input your targets
-
-![Targets](images/Targets.jpg)
-
-A.2 Discovery - Module that runs the Amass process to discover publicly exposed assets, feel free to create your configuration file to setup your API keys https://github.com/OWASP/Amass/blob/master/examples/config.ini
-
-![Discovery](images/Discovery.jpg)
-
-A.3 Enumeration - Module that runs the NMAP process to enumerate ports/services and create filters for the Redteam module. Default setup is to look for `--top-ports 200` but you can suit it to your needs in /opt/asf/tools/nmap/*.sh
-
-![Enumeration](images/Enumeration.jpg)
-
-A.4 Redteam - Module that runs submodules located in "/opt/asf/redteam"
-
-![Redteam](images/Redteam.jpg)
-
-### For Internal Targets: Steps followed
-
-1. Internal-> Targets: can specify specific IP or CIDR range or wildcard
-2. Initiate active target discovery for IP address with wildcard (without this discovery list, nmap enumeration won't work)
-3. Targets enumeration; quick (nmap ping sweep) or full enumeration setup regex if required
-4. Red team - Input to select 'internal enumeration' and select module & save job; can take targets that were enumerated through ping sweep
-4. Start job
-5. Alerts generated from the assessment; organized based on assessment id specific to a tool
-
-### Using Kali linux
-
-Latest version of Kali Linux (tested on 64 bits) - https://kali.org/get-kali/
-
-Latest version of Subfinder installed, for instructions see https://github.com/projectdiscovery/subfinder
-
-16 GB of RAM at least
-
-1 TB HD - XFS filesystem recommended
-
-Build & Run
-
-As root
-
-1. `git clone https://github.com/vmware-labs/attack-surface-framework.git /opt/asf`
-2. `cd /opt/asf/`
-3. Run `./setup.sh`
-4. Assign youruser, email and yourpass
-
-Once the installation is completed
-
-5. `cd /opt/asf/frontend/asfui/`
-6. `. bin/activate`
-7. `python3 manage.py runserver 0.0.0.0:8080` - We recommend to run it on a screen session to leave server persistent (`screen -S asf`)
-
-Security
+Security (TODO)
 
 ASF is not meant to be publicly exposed, assuming you install it on a cloud provider or even on a local instance, we recommend to access it using port forwarding through SSH, here is an example:
 
 `ssh -i "key.pem" -L 8080:127.0.0.1:8080 user@yourhost` - For ASF GUI
-
-`ssh -i "key.pem" -L 9045:127.0.0.1:9045 user@yourhost` - To access Graylog2 Panel
-
-Then open your browser and go to: 
-
-`http://127.0.0.1:8080` - For ASF - user:youruser pass:yourpass (provided in initial setup)
-
-`https://127.0.0.1:9045` - For Graylog2 - user:admin pass:admin #Change it in /graylog/docker-compose.yaml
-
-Graylog2 requires a few steps to start receiving logs from ASF: 
-
-Once logged in, go to System/"Content Packs" and import the Content Pack located at /opt/asf/tools/graylog/content_pack_ASF.json, click on the "Upload" button and you should see "Basic" reflected in the "Select Content Packs" section, click on "Basic", make sure the "ASF" radio button is selected and hit the "Apply content" button, this will create the Global input to parse JSON logs and related extractors. 
-
-![Graylog2 Inputs Example](images/Graylog_content_pack.jpg)
-
-Now you are ready to receive logs from ASF and setup your streams / alerts / dasboards ! 
-
-More info @ https://docs.graylog.org/en/4.1/ 
-
-## Contributing
-
-The attack-surface-framework project team welcomes contributions from the community. Before you start working with attack-surface-framework, please
-read our [Developer Certificate of Origin](https://cla.vmware.com/dco). All contributions to this repository must be
-signed as described on that page. Your signature certifies that you wrote the patch or have the right to pass it on
-as an open-source patch. For more detailed information, refer to [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## License
-
-Attack Surface Framework
-Copyright 2021 VMware, Inc.
-
-The BSD-2 license (the "License") set forth below applies to all parts of the Attack Surface Framework project. You may not use this file except in compliance with the License.
-
-BSD-2 License 
-
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
-
-Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-
-Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-## Notice
-
-Attack Surface Framework
-Copyright 2021 VMware, Inc.
-
-This product is licensed to you under the BSD-2 license (the "License"). You may not use this product except in compliance with the BSD-2 License.  
-
-This product may include a number of subcomponents with separate copyright notices and license terms. Your use of these subcomponents is subject to the terms and conditions of the subcomponent's license, as noted in the LICENSE file. 
 
 ### Credits
 
@@ -163,8 +76,6 @@ https://github.com/projectdiscovery/nuclei
 
 https://www.metasploit.com
 
-https://www.kalilinux.org
-
 https://www.graylog.org/products/open-source
 
 https://github.com/wpscanteam/wpscan
@@ -174,7 +85,3 @@ https://github.com/vanhauser-thc/thc-hydra
 https://nxlog.co/products/nxlog-community-edition
 
 https://www.docker.com/
-
-## Presented at Blackhat Arsenal
-
-https://www.blackhat.com/us-21/arsenal/schedule/index.html#vdoberman-24096
