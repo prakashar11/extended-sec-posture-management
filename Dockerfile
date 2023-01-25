@@ -10,12 +10,14 @@ RUN mkdir -p /opt/asf/frontend
 RUN mkdir -p /opt/asf/images
 RUN mkdir -p /opt/asf/redteam
 RUN mkdir -p /opt/asf/tools
-RUN mkdir -p /opt/asf/pip_cache
+# RUN mkdir -p /opt/asf/pip_cache
 # RUN mkdir -p /home/asf
 RUN mkdir -p /opt/asf/jobs
 RUN mkdir -p /opt/asf/toolsrun/nmap.int
 # RUN mkdir -p /mnt
 RUN mkdir -p /opt/asf/toolsrun
+RUN mkdir -p /opt/asf/frontend/asfui/core/db
+RUN mkdir -p /opt/asf/frontend/asfui/core/db/db
 WORKDIR /opt/asf
 RUN \
   apt-get -y update && \
