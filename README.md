@@ -39,10 +39,9 @@ TODO: SaaS applications configuration check e.g., Google Workspace configuration
 ## Using docker
 
 1. Clone repo
-2. Create jobs & db/db folders in the root of the cloned repo 
-3. dc-build.sh - builds the image & starts the container
-4. http://127.0.0.1:8080
-5. Note: default superuser created with admin credentials; needs change 
+2. dc-build.sh - builds the image & starts the container
+3. http://127.0.0.1:8080
+   Note: default superuser created with admin credentials; needs change 
 
 Note: this is the dev Django webserver based deployment; nginx and gunicorn are yet to be enabled. Also shares same unix socket as that of host.
 
