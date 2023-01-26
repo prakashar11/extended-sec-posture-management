@@ -18,6 +18,7 @@ RUN mkdir -p /opt/asf/toolsrun/nmap.int
 RUN mkdir -p /opt/asf/toolsrun
 RUN mkdir -p /opt/asf/frontend/asfui/core/db
 RUN mkdir -p /opt/asf/frontend/asfui/core/db/db
+RUN mkdir -p /var/log/
 WORKDIR /opt/asf
 RUN \
   apt-get -y update && \
@@ -66,24 +67,25 @@ RUN git clone https://github.com/projectdiscovery/nuclei-templates.git /opt/asf/
 #RUN CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 EXPOSE 8080
 STOPSIGNAL SIGTERM
-# USER root
-# ARG uid=1001
-# ARG gid=1337
-# ARG appuser=asfuser
-# ENV appuser ${appuser}
-# RUN \
-#     addgroup --gid ${gid} ${appuser} && \
-#     adduser --system --no-create-home --disabled-password --gecos '' \
-#         --uid ${uid} --gid ${gid} ${appuser} && \
-#     chown -R root:root /opt && \
-#     chmod -R u+rwX,go+rX,go-w /opt && \
-#     # Allow for bind mounting local_settings.py and other setting overrides
-#     chown -R root:${appuser} /opt/asf && \
-#     chmod -R 775 /opt/asf && \
-#     mkdir /var/run/${appuser} && \
-#     chown ${appuser} /var/run/${appuser} && \
-# 	  chmod g=u /var/run/${appuser} && \
-#     mkdir -p media/threat && chown -R ${uid} media
-# USER ${uid}
+USER root
+ARG USER
+ARG USER_ID
+ARG GROUP
+ARG DOCKERGID
+ARG uid=${USER_ID}
+ARG gid=${GROUP}
+RUN addgroup --gid ${gid} ${USER} 
+# RUN useradd -g ${gid} -G ${DOCKERGID} -M -N -u ${USER_ID} ${USER}
+RUN adduser --uid ${uid} --gid ${gid} --no-create-home --disabled-password ${USER}
+RUN chgrp -R $gid /opt/asf
+RUN chown -R ${USER}:${USER} /opt/asf 
+RUN chown -R ${USER}:${USER} /var/log
+RUN chmod -R 775 /opt/asf
+RUN usermod -a -G root ${USER} 
+RUN groupadd docker
+RUN groupmod -g ${DOCKERGID} docker
+RUN usermod -aG docker ${USER}
+
+USER ${USER}
 # CMD ["./entrypoint.sh"]
 ENTRYPOINT ["./entrypoint.sh"]

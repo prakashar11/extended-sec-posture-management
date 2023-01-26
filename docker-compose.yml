@@ -2,15 +2,25 @@ version: "3"
 
 services:
   asmf:
-    build: .
+    # build: .
       #build:
       #args:
       #  COMPOSE_DOCKER_CLI_BUILD: 1
       #  DOCKER_BUILDKIT: 1
       #context: ./
       #dockerfile: Dockerfile
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        USER: ${USER:-0}
+        USER_ID: ${USER_ID:-0}
+        GROUP: ${GROUP:-0}
+        DOCKERGID: ${DOCKERGID:-0}
     environment:
       - HOST_FOLDER=$PWD
+    env_file:
+      - .env
     ports:
       - 8080:8080
     volumes:
