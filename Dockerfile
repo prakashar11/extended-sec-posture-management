@@ -13,7 +13,9 @@ RUN mkdir -p /opt/asf/tools
 # RUN mkdir -p /opt/asf/pip_cache
 # RUN mkdir -p /home/asf
 RUN mkdir -p /opt/asf/jobs
+RUN mkdir -p /opt/asf/toolsrun
 RUN mkdir -p /opt/asf/toolsrun/nmap.int
+RUN mkdir -p /opt/asf/toolsrun/nuclei-templates
 # RUN mkdir -p /mnt
 RUN mkdir -p /opt/asf/toolsrun
 RUN mkdir -p /opt/asf/frontend/asfui/core/db
@@ -54,7 +56,7 @@ COPY frontend ./frontend
 COPY images ./images
 COPY redteam ./redteam
 COPY tools ./tools
-RUN git clone https://github.com/projectdiscovery/nuclei-templates.git /opt/asf/toolsrun/nuclei-templates
+# RUN git clone https://github.com/projectdiscovery/nuclei-templates.git /opt/asf/toolsrun/nuclei-templates
 # VOLUME /var/run
 
 # RUN pip install -r requirements.txt --cache-dir /opt/asf/pip_cache

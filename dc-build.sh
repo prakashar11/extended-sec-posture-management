@@ -6,6 +6,13 @@ mkdir -p ./jobs
 mkdir -p ./db
 mkdir -p ./db/db
 
+if [ -e nuclei-templates ]
+then
+   echo "reusing nuclei-templates folder"
+else
+   git clone https://github.com/projectdiscovery/nuclei-templates.git ./nuclei-templates
+fi
+
 # environment file for docker compose
 
 eval "echo \"$(cat .env.start)\"" > .env

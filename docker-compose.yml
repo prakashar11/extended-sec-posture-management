@@ -26,5 +26,6 @@ services:
     volumes:
       - ${PWD}/jobs:/opt/asf/jobs
       - ${PWD}/db:/opt/asf/frontend/asfui/core/db
+      - ${PWD}/nuclei-templates:/opt/asf/toolsrun/nuclei-templates
       - /var/run/docker.sock:/var/run/docker.sock
       - /usr/bin/docker:/usr/bin/docker
