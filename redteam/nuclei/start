@@ -75,6 +75,7 @@ fi
 # mkdir -p $INSTALLED_FOLDER/toolsrun/nuclei-templates
 # chmod 777 $INSTALLED_FOLDER/toolsrun/nuclei-templates
 NUCLEI_TEMPLATE_FOLDER=${HOST_FOLDER}/nuclei-templates
+# NUCLEI_TEMPLATE_FOLDER=$INSTALLED_FOLDER/toolsrun/nuclei-templates
 
 # if ! test -e $INSTALLED_FOLDER/nuclei-templates/README.md
 # then
@@ -144,14 +145,15 @@ EOF
 else
     # echo "executing docker" >> /var/log/nuclei.log
     # echo docker run --rm -v $JOB_OUTPUT_FOLDER/:/mnt -v $INSTALLED_FOLDER/nuclei-templates:/app/nuclei-templates $IMAGE_NAME -t /app/nuclei-templates/ -no-color $ARG0 -l /mnt/app.input $ARG1 $ARG2  2>&1 \| tee "$JOB_OUTPUT_FOLDER/app.report.txt" \>\> "$JOB_OUTPUT_FOLDER/app.log" \&
-    echo docker run --rm -i -v $NUCLEI_TEMPLATE_FOLDER/nuclei-templates:/go/src/app/ $IMAGE_NAME -no-color $ARG0 -json -c 75 $ARG1 $ARG2 -<$JOB_OUTPUT_FOLDER/app.input  2>&1 | tee "$JOB_OUTPUT_FOLDER/app.report.txt" >> "$JOB_OUTPUT_FOLDER/app.log" &
+    echo docker run --rm -i -v $NUCLEI_TEMPLATE_FOLDER:/mnt $IMAGE_NAME -no-color $ARG0 -t /mnt -json -c 75 $ARG1 $ARG2 -<$JOB_OUTPUT_FOLDER/app.input  2>&1 | tee "$JOB_OUTPUT_FOLDER/app.report.txt" >> "$JOB_OUTPUT_FOLDER/app.log" &
     # docker run --rm -v /home/asf/jobs/2/20221230201914/:/mnt/ -v /home/nuclei-templates:/app/nuclei-templates projectdiscovery/nuclei -no-color -u http://192.168.1.135
     # docker run --rm -v $JOB_OUTPUT_FOLDER/:/mnt -v /home/nuclei-templates:/app/nuclei-templates $IMAGE_NAME -t /app/nuclei-templates/ -no-color $ARG0 -l /mnt/app.input $ARG1 $ARG2  2>&1 | tee "$JOB_OUTPUT_FOLDER/app.report.txt" >> "$JOB_OUTPUT_FOLDER/app.log" &
     # docker run --rm -v $JOB_OUTPUT_FOLDER/:/mnt $IMAGE_NAME -no-color $ARG0 -l /mnt/app.input -json $ARG1 $ARG2  2>&1 | tee "$JOB_OUTPUT_FOLDER/app.report.txt" >> "$JOB_OUTPUT_FOLDER/app.log" &
     # cat output of app.input to nuclei, seems to start multiple instances of nuclei and there seems to be an issue in
     # passing file/folder inside docker to another docker instance
     # 75 templates executed in parallel
-    docker run --rm -i -v $NUCLEI_TEMPLATE_FOLDER/nuclei-templates:/go/src/app/ $IMAGE_NAME -no-color $ARG0 -json -c 75 $ARG1 $ARG2 -<$JOB_OUTPUT_FOLDER/app.input  2>&1 | tee "$JOB_OUTPUT_FOLDER/app.report.txt" >> "$JOB_OUTPUT_FOLDER/app.log" &
+    # -v - verbose output
+    docker run --rm -i -v $NUCLEI_TEMPLATE_FOLDER:/mnt $IMAGE_NAME -no-color $ARG0 -t /mnt -json -c 75 $ARG1 $ARG2 -<$JOB_OUTPUT_FOLDER/app.input  2>&1 | tee "$JOB_OUTPUT_FOLDER/app.report.txt" >> "$JOB_OUTPUT_FOLDER/app.log" &
 fi
 JOB_PID=$!
 echo $JOB_PID>"$JOB_FOLDER/pid"
