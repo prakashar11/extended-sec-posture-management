@@ -40,9 +40,9 @@ class Command(BaseCommand):
                 Host = NMHost(line, host)
                 MDT,MDATA = get_metadata(Host.name,kwargs['destination'])
                 if kwargs['destination'] == "external":
-                    Result = vdServices(name=Host.name, nname=Host.nname, ipv4=Host.ipv4, tag=MDT['tag'], info = report_content, ports = Host.full_ports, full_ports = Host.full_ports, info_gnmap = Host.line, type=autodetectType(Host.name), metadata = MDATA, owner = MDT['owner'])
+                    Result = vdServices(name=Host.name, nname=Host.nname, ipv4=Host.ipv4, tag=MDT['tag'], info = report_content, ports = Host.full_ports, full_ports = Host.full_ports, info_gnmap = Host.line, asset_type=autodetectType(Host.name), metadata = MDATA, owner = MDT['owner'])
                 if kwargs['destination'] == "internal":
-                    Result = vdInServices(name=Host.name, nname=Host.nname, ipv4=Host.ipv4, tag=MDT['tag'], info = report_content, ports = Host.full_ports, full_ports = Host.full_ports, info_gnmap = Host.line, type=autodetectType(Host.name), metadata = MDATA, owner = MDT['owner'])
+                    Result = vdInServices(name=Host.name, nname=Host.nname, ipv4=Host.ipv4, tag=MDT['tag'], info = report_content, ports = Host.full_ports, full_ports = Host.full_ports, info_gnmap = Host.line, asset_type=autodetectType(Host.name), metadata = MDATA, owner = MDT['owner'])
                 NewData = True
                 
                 try:

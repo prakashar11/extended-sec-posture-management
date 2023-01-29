@@ -195,9 +195,9 @@ def parser_nuclei_http_store(PARSER_INPUT, PARSER_OUTPUT):
         # creating alert finding for the first time
         if count < 1:
             if alert_sub_test_id:
-                Nfinding = vdNucleiResult(name=host, firstdate=datetime.now().replace(tzinfo=tz), vulnerability=description, engine='Nuclei', level=level, type=autodetectType(host), bumpdate=datetime.now().replace(tzinfo=tz), detectiondate=datetime.now().replace(tzinfo=tz), scope=scope, status="open", metadata=reference, alert_test_id=json_line['template-id'], alert_sub_test_id=alert_sub_test_id, info=json_line)
+                Nfinding = vdNucleiResult(name=host, firstdate=datetime.now().replace(tzinfo=tz), vulnerability=description, engine='Nuclei', level=level, asset_type=autodetectType(host), bumpdate=datetime.now().replace(tzinfo=tz), detectiondate=datetime.now().replace(tzinfo=tz), scope=scope, status="open", metadata=reference, alert_test_id=json_line['template-id'], alert_sub_test_id=alert_sub_test_id, info=json_line)
             else:
-                Nfinding = vdNucleiResult(name=host, firstdate=datetime.now().replace(tzinfo=tz), vulnerability=description, engine='Nuclei', level=level, type=autodetectType(host), bumpdate=datetime.now().replace(tzinfo=tz), detectiondate=datetime.now().replace(tzinfo=tz), scope=scope, status="open", metadata=reference, alert_test_id=json_line['template-id'], info=json_line)
+                Nfinding = vdNucleiResult(name=host, firstdate=datetime.now().replace(tzinfo=tz), vulnerability=description, engine='Nuclei', level=level, asset_type=autodetectType(host), bumpdate=datetime.now().replace(tzinfo=tz), detectiondate=datetime.now().replace(tzinfo=tz), scope=scope, status="open", metadata=reference, alert_test_id=json_line['template-id'], info=json_line)
             Nfinding.save()
         
         # check whether for the received alert id there is a closed finding
@@ -284,7 +284,7 @@ def parser_nuclei_http(PARSER_INPUT, PARSER_OUTPUT):
                     delta(MSG)
             else:
                 #This line is a temporary MOD, please comment for system integrity, all objects should exist
-                Result = PARSER_OUTPUT(name=DOMAIN, nname=DOMAIN, tag="[Services]", type=autodetectType(DOMAIN), nuclei_http=line)
+                Result = PARSER_OUTPUT(name=DOMAIN, nname=DOMAIN, tag="[Services]", asset_type=autodetectType(DOMAIN), nuclei_http=line)
                 Result.save()
                 debug("Error, not found:"+str(DATA)+"\n")
         else:
@@ -338,7 +338,7 @@ def parser_nuclei_network(PARSER_INPUT, PARSER_OUTPUT):
                     delta(MSG)
             else:
                 #This line is a temporary MOD, please comment for system integrity, all objects should exist
-                Result = PARSER_OUTPUT(name=DOMAIN, nname=DOMAIN, tag="[Services]", type=autodetectType(DOMAIN), nuclei_http=line)
+                Result = PARSER_OUTPUT(name=DOMAIN, nname=DOMAIN, tag="[Services]", asset_type=autodetectType(DOMAIN), nuclei_http=line)
                 Result.save()
                 debug("Error, not found:"+str(DATA)+"\n")
         else:
@@ -395,7 +395,7 @@ def master_parser_nuclei(PARSER_INPUT, PARSER_OUTPUT, FILTER):
                             delta(MSG)
                     else:
                         #This line is a temporary MOD, please comment for system integrity, all objects should exist
-                        Result = PARSER_OUTPUT(name=DATA.name, nname=DATA.name, tag="[Services]", type=autodetectType(DATA.name), nuclei_http=line)
+                        Result = PARSER_OUTPUT(name=DATA.name, nname=DATA.name, tag="[Services]", asset_type=autodetectType(DATA.name), nuclei_http=line)
                         Result.save()
                         debug("Error, not found:"+str(DATA)+"\n")
                     #In this point we fill the new table for the dashboard

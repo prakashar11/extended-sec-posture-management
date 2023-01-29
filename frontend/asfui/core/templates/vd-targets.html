@@ -40,6 +40,21 @@
                 </table>                
               </div></span>
 </form>
+<tr>
+  <td>
+    <b>External IP discovery</b>
+      <form class="navbar-form" action="vd-targets" method="post">
+        {%csrf_token%}
+      <input type="hidden" name="target_action" value="extaddr">
+                    <button type="submit" class="btn btn-white btn-round btn-just-icon" rel="tooltip" title="" data-original-title="External IP discovery">
+                      <i class="material-icons">refresh status</i>
+                    <div class="ripple-container"></div>
+                  </button>
+      </form>
+    </td>
+</tr>
+<tr>
+  <td>
 <b>Merge:</b>Add or append new objects. <b>Delete:</b> Removes matching objects. <b>Sync:</b>Flush Orphans and append new objects by Tag.
 <form class="navbar-form" action="vd-export" method="post" style="display: inline;">
 	{%csrf_token%}
@@ -51,6 +66,8 @@
           </button>
           </div></span>
 </form>
+</td>
+</tr>
 <!-- Pager  -->
  <table width="100%">
  <tr>
@@ -150,7 +167,7 @@
                             {{ item.name }}
                           </td>
                           <td>
-                            {{ item.type }}
+                            {{ item.asset_type }}
                           </td>
                           <td>
                             {{ item.tag }}

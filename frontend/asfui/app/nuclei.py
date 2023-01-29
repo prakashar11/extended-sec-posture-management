@@ -36,7 +36,7 @@ class NFinding:
     def __init__(self, line=None, scope='E'):
         self.name = None
         self.tfp = None
-        self.type = None
+        self.asset_type = None
         self.source = None
         self.ipv4 = None
         self.ipv6 = None
@@ -86,7 +86,7 @@ class NFinding:
                     self.info = ""
                 self.setPortandName()
                 debug("Port detection debug:"+self.name+":"+str(self.port)+"\n")
-                self.type=autodetectType(self.name)
+                self.asset_type=autodetectType(self.name)
                 self.ptime,hours=nuclei_ptime(self.level, self.scope)
                 self.bumpdate=self.detectiondate+timedelta(hours=hours)
                 debug("Delta date:"+str(self.bumpdate)+":"+self.ptime+":"+self.level+":"+str(self.detectiondate)+"\n")

@@ -76,7 +76,7 @@ def parser_wpscan_output(kwargs):
             vulnerability="CVE-"+VULN['references']['cve'][0]
         else:
             vulnerability=VULN['title']
-        Nfinding = vdNucleiResult(name=REPORT['target_url'], firstdate=datetime.now(), bumpdate=datetime.now(), detectiondate=datetime.now(), owner="Unknown", metadata=str(VULN['references']), info=str(VULN), vulnerability=vulnerability, engine='WPSCAN', level='medium', uri=REPORT['target_url'], full_uri=REPORT['target_url'], uriistruncated=0, nname=REPORT['target_url'], type='URL', port=443, ptime='P1E')
+        Nfinding = vdNucleiResult(name=REPORT['target_url'], firstdate=datetime.now(), bumpdate=datetime.now(), detectiondate=datetime.now(), owner="Unknown", metadata=str(VULN['references']), info=str(VULN), vulnerability=vulnerability, engine='WPSCAN', level='medium', uri=REPORT['target_url'], full_uri=REPORT['target_url'], uriistruncated=0, nname=REPORT['target_url'], asset_type='URL', port=443, ptime='P1E')
 #        Nfinding.save()
         try:
             Nfinding.save()
@@ -102,7 +102,7 @@ def parser_wpscan_output(kwargs):
 
 
 def parser_subfinder_input(kwargs):
-    Targets=vdTarget.objects.filter(type='DOMAIN')
+    Targets=vdTarget.objects.filter(asset_type='DOMAIN')
     counter=0
     FileTargets=sys.stdout
     if kwargs['output']!='stdout':
@@ -150,7 +150,7 @@ def parser_subfinder_output(kwargs):
         for source in Finding['sources']:
             Tag=Tag+"["+source+"]"
         MDT,MDATA=get_metadata(Finding['host'])
-        Result = vdResult(name=Finding['host'], tag=Tag, info=Finding['input'], type=autodetectType(Finding['host']), owner=MDT['owner'], metadata=MDATA, engine='subfinder')
+        Result = vdResult(name=Finding['host'], tag=Tag, info=Finding['input'], asset_type=autodetectType(Finding['host']), owner=MDT['owner'], metadata=MDATA, engine='subfinder')
         NewData = True
         
         try:

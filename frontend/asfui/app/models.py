@@ -17,7 +17,7 @@ class vdTarget(models.Model):
     author = models.CharField(max_length=100, default='Me')
     lastdate = models.DateTimeField(auto_now=True)
     itemcount = models.IntegerField(default=0)
-    type = models.CharField(max_length=100, default='DOMAIN')
+    asset_type = models.CharField(max_length=100, default='DOMAIN')
     tag = models.CharField(max_length=250, default='DEFAULT')
     owner = models.CharField(max_length=512, default='')
     metadata = models.TextField(default="")
@@ -35,7 +35,7 @@ class vdInTarget(models.Model):
     author = models.CharField(max_length=100, default='Me')
     lastdate = models.DateTimeField(auto_now=True)
     itemcount = models.IntegerField(default=0)
-    type = models.CharField(max_length=100, default='DOMAIN')
+    asset_type = models.CharField(max_length=100, default='DOMAIN')
     tag = models.CharField(max_length=250, default='DEFAULT')
     owner = models.CharField(max_length=512, default='')
     metadata = models.TextField(default="")
@@ -51,7 +51,7 @@ class vdInTarget(models.Model):
 class vdResult(models.Model):
     # name = models.CharField(max_length=150, unique=True)
     name = models.CharField(max_length=150)
-    type = models.CharField(max_length=30, default="DOMAIN")
+    asset_type = models.CharField(max_length=30, default="DOMAIN")
     source = models.CharField(max_length=60, default="")
     ipv4 = models.CharField(max_length=20, default="")
     ipv6 = models.CharField(max_length=150, default="")
@@ -69,13 +69,13 @@ class vdResult(models.Model):
         return self.name.lower()
     
     def getList(self):
-        return {'name':self.name, 'type':self.type, 'source':self.source, 'ipv4': self.ipv4, 'ipv6':self.ipv6, 'lastdate':str(self.lastdate), 'itemcount':self.itemcount, 'tag':self.tag, 'info':self.info}
+        return {'name':self.name, 'asset_type':self.asset_type, 'source':self.source, 'ipv4': self.ipv4, 'ipv6':self.ipv6, 'lastdate':str(self.lastdate), 'itemcount':self.itemcount, 'tag':self.tag, 'info':self.info}
     
 class vdNucleiResult(models.Model):
     name = models.CharField(max_length=150)
     #True or False Positive -1 -> unset, 0 -> False positive -> True positive
     tfp = models.IntegerField(default=-1)
-    type = models.CharField(max_length=30, default="DOMAIN")
+    asset_type = models.CharField(max_length=30, default="DOMAIN")
     source = models.CharField(max_length=60, default="")
     ipv4 = models.CharField(max_length=20, default="")
     ipv6 = models.CharField(max_length=150, default="")
@@ -114,12 +114,12 @@ class vdNucleiResult(models.Model):
         return self.name.lower()
     
     def getList(self):
-        return {'name':self.name, 'type':self.type, 'source':self.source, 'ipv4': self.ipv4, 'ipv6':self.ipv6, 'lastdate':str(self.lastdate), 'itemcount':self.itemcount, 'tag':self.tag, 'info':self.info}
+        return {'name':self.name, 'asset_type':self.asset_type, 'source':self.source, 'ipv4': self.ipv4, 'ipv6':self.ipv6, 'lastdate':str(self.lastdate), 'itemcount':self.itemcount, 'tag':self.tag, 'info':self.info}
     
 class vdServices(models.Model):
     name = models.CharField(max_length=150, unique=True)
     nname = models.CharField(max_length=150, default="unknown")
-    type = models.CharField(max_length=30, default="DOMAIN")
+    asset_type = models.CharField(max_length=30, default="DOMAIN")
     source = models.CharField(max_length=60, default="")
     ipv4 = models.CharField(max_length=20, default="")
     ipv6 = models.CharField(max_length=150, default="")
@@ -146,7 +146,7 @@ class vdServices(models.Model):
 class vdInServices(models.Model):
     name = models.CharField(max_length=150, unique=True)
     nname = models.CharField(max_length=150, default="unknown")
-    type = models.CharField(max_length=30, default="DOMAIN")
+    asset_type = models.CharField(max_length=30, default="DOMAIN")
     source = models.CharField(max_length=60, default="")
     ipv4 = models.CharField(max_length=20, default="")
     ipv6 = models.CharField(max_length=150, default="")

@@ -26,6 +26,15 @@ Service waiting
 <td>
 {% if running %}
 <img src="static/assets/asf/wait.gif" width="45" height="50">
+<td>
+  <form class="navbar-form" action="vd-subfinder" method="post">
+    {%csrf_token%}
+  <button type="submit" class="btn btn-white btn-round btn-just-icon"  rel="tooltip" title="Status" data-original-title="Refresh">
+    <i class="material-icons">refresh status</i>
+    <div class="ripple-container"></div>
+  </button>
+  </form>
+</td>
 {% endif %}
 </td>
 <td>
@@ -253,7 +262,7 @@ Service waiting
                             {{ item.name }}
                           </td>
                           <td>
-                            {{ item.type }}
+                            {{ item.asset_type }}
                           </td>
                           <td>
                             {{ item.tags }}

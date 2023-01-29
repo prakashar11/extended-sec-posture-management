@@ -25,7 +25,7 @@ def discovery_new(request,context,autodetectType,delta):
             metadata = {}
             metadata['owner']="Admin from UI"
             Jmetadata = json.dumps(metadata)
-            vdResult.objects.update_or_create(name=domain, defaults={'type': Type, 'tag':Tag, 'lastdate': LastDate, 'owner': metadata['owner'], 'metadata': Jmetadata})
+            vdResult.objects.update_or_create(name=domain, defaults={'asset_type': Type, 'tag':Tag, 'lastdate': LastDate, 'owner': metadata['owner'], 'metadata': Jmetadata})
         if 'amass_file' in request.FILES:
             amass_file = request.FILES['amass_file']
             fs = FileSystemStorage()
@@ -41,7 +41,7 @@ def discovery_new(request,context,autodetectType,delta):
                 metadata['bulk']=amass_file.name
                 Jmetadata = json.dumps(metadata)
                 try:
-                    vdResult.objects.update_or_create(name=domain, defaults={'type': Type, 'tag':Tag, 'lastdate': LastDate, 'owner':metadata['owner'], 'metadata': Jmetadata})
+                    vdResult.objects.update_or_create(name=domain, defaults={'asset_type': Type, 'tag':Tag, 'lastdate': LastDate, 'owner':metadata['owner'], 'metadata': Jmetadata})
                 except:
                     sys.stderr.write("Duplicated Amass Discovery, Skipping:"+domain)
                     

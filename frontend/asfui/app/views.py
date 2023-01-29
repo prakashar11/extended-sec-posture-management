@@ -43,8 +43,9 @@ logger.setLevel(logging.DEBUG)
 consoleHandler = logging.StreamHandler()
 logger.addHandler(consoleHandler)
 
-class NmapExecutionError(Exception):
-    """Exception raised when en error occurred during nmap call"""
+class CommandExecutionError(Exception):
+    """Exception raised when en error occurred during linux command call"""
+    pass
 
 def pager(context, page, page_size, count):
     if page<0:
@@ -341,9 +342,43 @@ def targets(request):
 #Delete a target
     def target_delete():
         target_delete_model(vdTarget,vdServices,request,context,autodetectType,delta)
+
+    def get_external_ip():
+        logger.debug("get external IP associated")
+        timeout = None
+        output = None
+        cmd = f"curl -s http://whatismyip.akamai.com/"
+        # get public external IP address associated
+        # TODO also have to make osquery calls to other assets registered
+        sub_proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        try:
+            output, errs = sub_proc.communicate(timeout=timeout)
+            # byte to string
+            extaddr = output.decode("utf-8")
+        except Exception as e:
+            sub_proc.kill()
+            raise (e)
+        else:
+            if 0 != sub_proc.returncode:
+                raise CommandExecutionError('Error during command: "' + ' '.join(cmd) + '"\n\n' + errs.decode('utf8'))
+            if extaddr:
+                # make an entry for the public IP
+                Type = autodetectType(extaddr)
+                tz = timezone.get_current_timezone()
+                LastDate = datetime.now().replace(tzinfo=tz)
+                Tag = "External IP"
+                Result = vdTarget(name=extaddr, asset_type=Type, tag=Tag, lastdate=LastDate)
+                try:
+                    Result.save()
+                    logger.debug(f"New external IP saved {extaddr}")
+                except:
+                    pass
+            else:
+                logger.warning("error getting external address")
+            return
         
 #Dirty solution since python lacks of switch case :\
-    action={'new':target_new, 'delete':target_delete}
+    action={'new':target_new, 'delete':target_delete, 'extaddr': get_external_ip}
     if 'target_action' in request.POST:
         if request.POST['target_action'] in action:
             action[request.POST['target_action']]()
@@ -486,7 +521,7 @@ def intargets(request):
                 raise (e)
             else:
                 if 0 != sub_proc.returncode:
-                    raise NmapExecutionError('Error during command: "' + ' '.join(cmd) + '"\n\n' + errs.decode('utf8'))
+                    raise CommandExecutionError('Error during command: "' + ' '.join(cmd) + '"\n\n' + errs.decode('utf8'))
                 if output:
                     # logger.debug(f"output from nmap scan {output}")
                     xmlroot = ET.fromstring(output.decode('utf8').strip())
@@ -512,7 +547,7 @@ def intargets(request):
                         port_details = parse_ports(hosts)
                         # update target
                         try:
-                            vdInTarget.objects.update_or_create(name=address, defaults={'type': Type, 'tag':Tag, 'lastdate': LastDate, 'owner': metadata['owner'], 'metadata': Jmetadata}, info=json.dumps(port_details, indent=4))
+                            vdInTarget.objects.update_or_create(name=address, defaults={'asset_type': Type, 'tag':Tag, 'lastdate': LastDate, 'owner': metadata['owner'], 'metadata': Jmetadata}, info=json.dumps(port_details, indent=4))
                             logger.debug(f"completed vdInTarget update for {address} {Tag}")
                         except:
                             # directly updating the model
@@ -675,11 +710,33 @@ def subfinder(request):
 
 #stop subfinder
     def subfinder_stop():
-        sys.stdout.write("Stopping Subfinder")
+        timeout = None
+        logger.debug("Stopping Subfinder")
         subprocess.Popen(["killall", "subfinder.sh"])
-        if path.exists("/opt/asf/toolsrun/discovery/.lock"):
-            os.remove("/opt/asf/toolsrun/discovery/.lock")
-        subprocess.Popen(["killall", "subfinder"])
+        # if path.exists("/opt/asf/toolsrun/discovery/.lock"):
+        #     os.remove("/opt/asf/toolsrun/discovery/.lock")
+        # subprocess.Popen(["killall", "subfinder"])
+        cmd = 'docker container ls | grep "projectdiscovery/subfinder"'
+        sub_proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        try:
+            output, errs = sub_proc.communicate(timeout=timeout)
+        except Exception as e:
+            sub_proc.kill()
+            raise (e)
+        else:
+            if 0 != sub_proc.returncode:
+                raise CommandExecutionError('Error during command: "' + ' '.join(cmd) + '"\n\n' + errs.decode('utf8'))
+        container_id = output.decode('utf-8').split(' ')[0]
+        cmd = f"docker kill {container_id}"
+        sub_proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        try:
+            output, errs = sub_proc.communicate(timeout=timeout)
+        except Exception as e:
+            sub_proc.kill()
+            raise (e)
+        else:
+            if 0 != sub_proc.returncode:
+                raise CommandExecutionError('Error during command: "' + ' '.join(cmd) + '"\n\n' + errs.decode('utf8'))
         context['running'] = False
         return
     
@@ -1034,7 +1091,7 @@ def inportscan(request):
                 raise (e)
             else:
                 if 0 != sub_proc.returncode:
-                    raise NmapExecutionError('Error during command: "' + ' '.join(cmd) + '"\n\n' + errs.decode('utf8'))
+                    raise CommandExecutionError('Error during command: "' + ' '.join(cmd) + '"\n\n' + errs.decode('utf8'))
                 if output:
                     logger.debug(f"output from nmap scan {output}")
                     xmlroot = ET.fromstring(output.decode('utf8').strip())
@@ -1060,7 +1117,7 @@ def inportscan(request):
                         # update target
                         try:
                             # vdInTarget.objects.update_or_create(name=address, defaults={'type': Type, 'tag':Tag, 'lastdate': LastDate, 'owner': metadata['owner'], 'metadata': Jmetadata})
-                            vdInServices.objects.update_or_create(name=address, nname=address, ipv4=address, tag=Tag, type=Type, metadata = Jmetadata, owner = metadata['owner'])
+                            vdInServices.objects.update_or_create(name=address, nname=address, ipv4=address, tag=Tag, asset_type=Type, metadata = Jmetadata, owner = metadata['owner'])
                             logger.debug(f"completed vdInTarget update for {address} {Tag}")
                         except:
                             logger.debug("vdTarget model update failed")
@@ -1533,7 +1590,7 @@ def export(request):
         query = vdResult.objects.all()
         writer.writerow(['name', 'type', 'ipv4', 'lastdate', 'tag', 'info'])
         for host in query:
-            writer.writerow([host.name, host.type, host.ipv4, host.lastdate, host.tag, host.info])
+            writer.writerow([host.name, host.asset_type, host.ipv4, host.lastdate, host.tag, host.info])
         return
     
     def export_services(writer):
@@ -1576,21 +1633,21 @@ def export(request):
         query = vdTarget.objects.all()
         writer.writerow(['name', 'type', 'lastdate', 'itemcount', 'tag', 'owner', 'metadata'])
         for host in query:
-            writer.writerow([host.name, host.type, host.lastdate, host.itemcount, host.tag, host.owner, host.metadata])
+            writer.writerow([host.name, host.asset_type, host.lastdate, host.itemcount, host.tag, host.owner, host.metadata])
         return
 
     def export_intargets(writer):
         query = vdInTarget.objects.all()
         writer.writerow(['name', 'type', 'lastdate', 'itemcount', 'tag', 'owner', 'metadata'])
         for host in query:
-            writer.writerow([host.name, host.type, host.lastdate, host.itemcount, host.tag, host.owner, host.metadata])
+            writer.writerow([host.name, host.asset_type, host.lastdate, host.itemcount, host.tag, host.owner, host.metadata])
         return
 
     def export_nuclei(writer):
         query = vdNucleiResult.objects.all()
         writer.writerow(['name', 'type', 'tfp', 'lastdate', 'vulnerability', 'info', 'full_uri', 'metadata'])
         for host in query:
-            writer.writerow([host.name, host.type, host.tfp, host.lastdate, host.vulnerability, host.info, host.full_uri, host.metadata])
+            writer.writerow([host.name, host.asset_type, host.tfp, host.lastdate, host.vulnerability, host.info, host.full_uri, host.metadata])
         return
         
     def export_cypher_ex(writer):

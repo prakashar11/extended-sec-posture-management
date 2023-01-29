@@ -34,7 +34,7 @@ class Command(BaseCommand):
                 line = Finding[1]
                 Finding = AMASS_SEPARATOR.split(line)
                 MDT,MDATA=get_metadata(Finding[0])
-                Result = vdResult(name=Finding[0], tag=Tag, info=Finding[1], type=autodetectType(Finding[0]), owner=MDT['owner'], metadata=MDATA)
+                Result = vdResult(name=Finding[0], tag=Tag, info=Finding[1], asset_type=autodetectType(Finding[0]), owner=MDT['owner'], metadata=MDATA)
                 NewData = True
                 
                 try:
