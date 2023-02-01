@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "starting metasploit job"
+
 if test "f$1" "=" "f"
 then 
     echo "Error, please specify a JobID"
@@ -23,13 +25,13 @@ then
 fi
 echo > "$JOB_FOLDER/.lock"
 cd /opt/asf/frontend/asfui
-. bin/activate
+#. bin/activate
 python3 /opt/asf/frontend/asfui/manage.py remaster_input --input JobID:$1 --parser host --output "$JOB_FOLDER/app.input"
 mkdir -p $JOB_OUTPUT_FOLDER
 cp /opt/asf/tools/dicts/default.dict "$JOB_FOLDER/app.dict"
 cp /opt/asf/tools/dicts/users.dict "$JOB_FOLDER/app.users"
 for mode in input asf dict users
-do cp -v "$JOB_FOLDER/app.$mode" "$JOB_OUTPUT_FOLDER/app.$mode"
+    do cp -v "$JOB_FOLDER/app.$mode" "$JOB_OUTPUT_FOLDER/app.$mode"
 done
 cp -v "$JOB_FOLDER/msf.asfui" "$JOB_OUTPUT_FOLDER/msf.asfui"
 echo "python3 /opt/asf/frontend/asfui/manage.py msfwrapper --input=$JOB_OUTPUT_FOLDER/app.input --msfconfig=$JOB_OUTPUT_FOLDER/msf.asfui --output=$JOB_OUTPUT_FOLDER/app.report.txt 2>&1 > $JOB_OUTPUT_FOLDER/app.log"

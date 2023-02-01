@@ -51,12 +51,14 @@ function search_msf_module(SuchForm){
              <span class="bmd-form-group"><div class="input-group no-border">
              <input type="text" name='job_name' value="" class="form-control" placeholder="New job name">             
              In:
+             <tr>
              <select name='job_input' class="form-control">
              <!-- <option value="amass">Amass Output</option>
              <option value="services">External Enumeration</option> -->
-             <option value="active_domains">Active Domains</option>
-             <option value="inservices">Internal Enumeration</option>
+             <option value="inservices"> Internal Enumeration</option>
+             <option value="active_domains"> Active Domains</option>
              </select>
+            </tr>
              Filter:
              <select name='job_regexp' class="form-control">
 {% for item in saved_regexp %}
@@ -65,9 +67,13 @@ function search_msf_module(SuchForm){
              </select>
              Module
              <select name='job_module' class="form-control">
-{% for item in modules %}
+                <!-- <option value="amass">Amass Output</option>
+                <option value="services">External Enumeration</option> -->
+                <option value="nuclei"> Nuclei Assessment</option>
+                </select>
+<!-- {% for item in modules %}
              <option value="{{ item.name }}">{{ item.name }}/{{ item.info }}</option>
-{% endfor %}
+{% endfor %} -->
              </select>
 			 <input type="hidden" name="job_action" value="create">
              <button type="submit" class="btn btn-white btn-round btn-just-icon" rel="tooltip" title="" data-original-title="Create Job">
