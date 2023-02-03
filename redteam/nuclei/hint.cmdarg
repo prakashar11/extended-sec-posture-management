@@ -1,7 +1,9 @@
-Here is where you add arguments that will be passed to below command (located in /opt/redteam/nuclei/start) 
+Following is the format used to invoke Nuclei template based assessment. Specific template-id or templates can be passed to this invocation through argument customization
 
-"docker run --rm -v $JOB_OUTPUT_FOLDER/:/mnt -v /opt/asf/toolsrun/nuclei-templates:/app/nuclei-templates $IMAGE_NAME -no-color $ARG0 -l /mnt/app.input $ARG1"
+docker run --rm -i -v $NUCLEI_TEMPLATE_FOLDER:/mnt $IMAGE_NAME -no-color $ARG0 -json -c 75 $ARG1 -<$JOB_OUTPUT_FOLDER/app.input  2>&1
 
-Note1: You can add a max of 10 arguments
-Note2: If you want to select all templates from Nuclei just add -t /app/nuclei-templates
-Note3: For running specific templates /app/nuclei-templates/<<folder or file>> (Location in localhost is in "/opt/asf/toolsrun/nuclei-templates)
+i.e.,
+
+1. Use Argument 0 (ARG0) to pass template-id or template folder to use e.g., '-t /mnt/cloud/aws'; note '-t' flag. '/mnt' is the base Nuclei template folder that may contain customized templates. If Argument 0 is not passed, then all Nuclei templates would be used for assessment
+
+2.Additinonal arguments can be used in Arugment 1 e.g., '-v' for verbose Nuclei output
