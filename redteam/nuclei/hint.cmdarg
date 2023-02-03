@@ -4,6 +4,8 @@ docker run --rm -i -v $NUCLEI_TEMPLATE_FOLDER:/mnt $IMAGE_NAME -no-color $ARG0 -
 
 i.e.,
 
-1. Use Argument 0 (ARG0) to pass template-id or template folder to use e.g., '-t /mnt/cloud/aws'; note '-t' flag. '/mnt' is the base Nuclei template folder that may contain customized templates. If Argument 0 is not passed, then all Nuclei templates would be used for assessment
+1. Use Argument 0 (ARG0) to pass template-id or template folder to use e.g., '-t /mnt/cloud/aws'; note '-t' flag. '/mnt' is the base Nuclei template folder that may contain customized templates. If Argument 0 is not passed, then all Nuclei templates would be used for assessment.
 
-2.Additinonal arguments can be used in Arugment 1 e.g., '-v' for verbose Nuclei output
+2. In the above example 'could/aws' is a folder with custom Nuclei template. Add the custom template in the ./nuclei-templates folder as it gets mapped as a volume to the Nuclei docker instance
+
+3.Additinonal arguments can be used in Arugment 1 e.g., '-v' for verbose Nuclei output; or '-tags cisa' for assessing CISA known exploitable vulnerability catalog or '-debug' to show all requests and responses
