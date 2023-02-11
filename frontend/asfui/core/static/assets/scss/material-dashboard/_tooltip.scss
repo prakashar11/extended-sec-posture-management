@@ -10,6 +10,11 @@
 
 
 }
+// .tooltip.tooltip-hidden {
+//     opacity: 0;
+//     @include transform-translate-y(0px);
+// }
+
 .tooltip{
     opacity: 0;
     transition: opacity, transform .2s ease;

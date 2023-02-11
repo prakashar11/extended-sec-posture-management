@@ -12,7 +12,13 @@
       {% if user.is_authenticated %}
       <div class="sidebar-wrapper">
         <ul class="nav">
-           <li class="nav-item {% if 'vd-dashboard' in segment or 'vd-targets' in segment or 'vd-amass' in segment or 'vd-portscan' in segment or 'vd-subfinder' in segment %} active {% endif %}">
+          <li class="nav-item {% if 'vd-dashboard' in segment %} active {% endif %}">
+            <a class="nav-link" href="/vd-dashboard">
+              <i class="material-icons">dashboard</i>
+              <p>Dashboard</p>
+            </a>
+          </li>
+           <li class="nav-item {% if 'vd-targets' in segment or 'vd-amass' in segment or 'vd-portscan' in segment or 'vd-subfinder' in segment %} active {% endif %}">
             <a class="nav-link" href="/vd-targets">
               <i class="material-icons">all_out</i>
               External

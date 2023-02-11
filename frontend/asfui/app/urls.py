@@ -15,7 +15,7 @@ urlpatterns = [
     path('vd-redteam', views.redteam),
     path('vd-nuclei', views.nuclei),
     path('vd-nuclei-templates', views.nucleitemplates),
-#    path('vd-dashboard', views.dashboard),
+    path('vd-dashboard', views.dashboard),
     
     #Internal
     path('vd-in-targets',views.intargets),
@@ -25,7 +25,8 @@ urlpatterns = [
     path('vd-export', views.export),
     
     # The home page
-    path('', views.targets, name='home'),
+    # path('', views.targets, name='home'),
+    path('', views.dashboard, name='home'),
 #    path('', views.dashboard, name='dashboard'),
     
     # Matches any html file

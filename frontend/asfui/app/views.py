@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from django import template
 from django.core.files.storage import FileSystemStorage
 from django.core.management import call_command
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 import time
 
 from .models import vdTarget, vdInTarget, vdResult, vdServices, vdInServices, vdRegExp, vdJob, vdNucleiResult, vdNucleiTemplate
@@ -219,19 +219,20 @@ def nucleitemplates(request):
                 filename = str(path)
                 nucleifn=filename.replace(folder, "")
                 with open(filename) as f:                    
-                    data = yaml.safe_load(f) # dict returned
-                    try:
-                        # assume it is a new entry
-                        severity = '' if not 'severity' in data['info'] else data['info']['severity']
-                        Nentry = vdNucleiTemplate(template_id=data['id'], info=data, name=data['info']['name'], severity=severity, template=nucleifn)
-                        Nentry.save()
-                    except:
-                        # existing template; refresh the severity, name and info
-                        Nentry = vdNucleiTemplate.objects.filter(name=data['id'])
-                        Nentry.info = data
-                        severity = '' if not 'severity' in data['info'] else data['info']['severity']
-                        Nentry.severity = severity
-                        Nentry.save()
+                    data = yaml.safe_load(f)
+                    # data = f.readlines()
+                try:
+                    # assume it is a new entry
+                    severity = '' if not 'severity' in data['info'] else data['info']['severity']
+                    Nentry = vdNucleiTemplate(template_id=data['id'], info=data, name=data['info']['name'], severity=severity, template=nucleifn)
+                    Nentry.save()
+                except:
+                    # existing template; refresh the severity, name and info
+                    Nentry = vdNucleiTemplate.objects.filter(name=data['id'])
+                    Nentry.info = data
+                    severity = '' if not 'severity' in data['info'] else data['info']['severity']
+                    Nentry.severity = severity
+                    Nentry.save()
         return
 
     def nuclei_get_template_file():
@@ -411,8 +412,25 @@ def targets(request):
 def dashboard(request):
     context = {}
     context['segment'] = 'vd-dashboard'
+    # external asset details
     context['targets'] = vdTarget.objects.all().count()
     context['amass'] = str(vdResult.objects.all().count())
+    context['subfinder_total'] = vdResult.objects.filter(engine='subfinder').count()
+    context['subfinder_active'] = vdResult.objects.filter(engine='subfinder', active='Yes').count()
+    # finding details
+    context['num_critical'] = vdNucleiResult.objects.filter(level='critical').count()
+    context['num_high'] = vdNucleiResult.objects.filter(level='high').count()
+    context['num_medim'] = vdNucleiResult.objects.filter(level='medium').count()
+    context['num_low'] = vdNucleiResult.objects.filter(level='low').count()
+    context['num_info'] = vdNucleiResult.objects.filter(level='info').count()
+    # SLA details
+    tz = timezone.get_current_timezone()
+    enddate = datetime.today().replace(tzinfo=tz)
+    startdate = (enddate - timedelta(days=30)).replace(tzinfo=tz)
+    context['sla_info'] = vdNucleiResult.objects.filter(firstdate__range=[startdate, enddate], level='info', status='open').count()
+    context['sla_low'] = vdNucleiResult.objects.filter(firstdate__range=[startdate, enddate], level='low', status='open').count()
+    # internal assets details
+    context['internal_total'] = vdInTarget.objects.all().count()
     ObjWithServices = vdServices.objects.all()
     context['portscan'] = str(ObjWithServices.count())
     context['nuclei'] = []

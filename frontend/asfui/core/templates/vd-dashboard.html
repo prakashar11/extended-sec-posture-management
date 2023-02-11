@@ -14,9 +14,9 @@
             <div class="card-icon">
               <i class="material-icons">center_focus_strong</i>
             </div>
-            <p class="card-category">Total Targets</p>
+            <p class="card-category">Public Assets (Domains/IPs)</p>
             <h3 class="card-title">{{ targets }}
-              <small>obj</small>
+              <!-- <small>obj</small> -->
             </h3>
           </div>
           <div class="card-footer">
@@ -32,9 +32,10 @@
             <div class="card-icon">
               <i class="material-icons">library_books</i>
             </div>
-            <p class="card-category">Discovered Hosts</p>
-            <h3 class="card-title">{{ amass }}
-            <small>obj</small>
+            <p class="card-category">Discovered Public Domains</p>
+            <!-- <h3 class="card-title">{{ amass }} -->
+            <h3 class="card-title">{{ subfinder_total }}
+            <!-- <small>obj</small> -->
             </h3>
           </div>
           <div class="card-footer">
@@ -50,9 +51,11 @@
             <div class="card-icon">
               <i class="material-icons">bubble_chart</i>
             </div>
-            <p class="card-category">Hosts with Services</p>
-            <h3 class="card-title">{{ portscan }}
-            <small>h</small>
+            <!-- <p class="card-category">Port Scan Completed Assets</p>
+            <h3 class="card-title">{{ portscan }} -->
+               <p class="card-category">Active domains </p>
+            <h3 class="card-title">{{ subfinder_active }}
+            <!-- <small>h</small> -->
             </h3>
           </div>
           <div class="card-footer">
@@ -62,7 +65,7 @@
           </div>
         </div>
       </div>
-      <div class="col-lg-3 col-md-6 col-sm-6">
+      <!-- <div class="col-lg-3 col-md-6 col-sm-6">
         <div class="card card-stats">
           <div class="card-header card-header-danger card-header-icon">
             <div class="card-icon">
@@ -79,58 +82,69 @@
             </div>
           </div>
         </div>
-      </div>    <div class="row">
-      <div class="col-md-4">
+      </div>     -->
+      <div class="row">
+      <div class="col-md-12">
         <div class="card card-chart">
           <div class="card-header card-header-success">
             <div class="ct-chart" id="dailySalesChart"></div>
           </div>
           <div class="card-body">
-            <h4 class="card-title">Daily Discovered Hosts</h4>
+            <h4 class="card-title">External and Internal Assets</h4>
             <p class="card-category">
-              <span class="text-success"><i class="fa fa-long-arrow-up"></i> 55% </span> increase.</p>
+              <!-- <span class="text-success"><i class="fa fa-long-arrow-up"></i> 55% </span> increase.</p> -->
           </div>
           <div class="card-footer">
             <div class="stats">
-              <i class="material-icons">access_time</i> updated 4 minutes ago
+              <!-- <i class="material-icons">access_time</i> updated 4 minutes ago -->
             </div>
           </div>
         </div>
       </div>
-      <div class="col-md-4">
+      <div class="col-md-12">
         <div class="card card-chart">
           <div class="card-header card-header-warning">
             <div class="ct-chart" id="websiteViewsChart"></div>
           </div>
           <div class="card-body">
-            <h4 class="card-title">Daily Discovered Services</h4>
-            <span class="text-success"><i class="fa fa-long-arrow-up"></i> 35% </span> increase.</p>
+            <h4 class="card-title">Finding Count based on Severity</h4>
+            <p class="card-category">Critical {{ num_critical }} </p>
+            <p class="card-category">High {{ num_high }} </p>
+            <p class="card-category">Medium {{ num_medim }} </p>
+            <p class="card-category">Low {{ num_low }} </p>
+            <p class="card-category">Info {{ num_info }} </p>
+            <!-- <span class="text-success"><i class="fa fa-long-arrow-up"></i> 35% </span> increase.</p> -->
           </div>
           <div class="card-footer">
             <div class="stats">
-              <i class="material-icons">access_time</i> campaign sent 2 days ago
+              <!-- <i class="material-icons">access_time</i> campaign sent 2 days ago -->
             </div>
           </div>
         </div>
       </div>
-      <div class="col-md-4">
+      <div class="col-md-12">
         <div class="card card-chart">
-          <div class="card-header card-header-danger">
-            <div class="ct-chart" id="completedTasksChart"></div>
+          <div class="card-header card-header-info">
+            <div class="ct-chart" id="completedTasksChart" rel="tooltip" title="Findings" >
+              <div class="hidden absolute inline-block chartist-tooltip text-xs shadow text-center px-3 py-1 rounded-md w-28">
+                <span class="chartist-tooltip-meta"></span><br />
+                <span class="chartist-tooltip-value"></span>
+             </div>
+            </div>
           </div>
           <div class="card-body">
-            <h4 class="card-title">Completed Tasks</h4>
-            <p class="card-category">Last Campaign Performance</p>
+            <h4 class="card-title">Finding Remediation Trend</h4>
+            <!-- <p class="card-category">Open finding trend</p> -->
           </div>
           <div class="card-footer">
             <div class="stats">
-              <i class="material-icons">access_time</i> campaign sent 2 days ago
+              <!-- <i class="material-icons">access_time</i> campaign sent 2 days ago -->
             </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="row">
+    <!-- <div class="row">
       <div class="col-lg-6 col-md-12">
         <div class="card">
           <div class="card-header card-header-tabs card-header-primary">
@@ -292,8 +306,8 @@
             </div>
           </div>
         </div>
-      </div>
-      <div class="col-lg-6 col-md-12">
+      </div> -->
+      <!-- <div class="col-lg-6 col-md-12">
         <div class="card">
           <div class="card-header card-header-warning">
             <h4 class="card-title">TOP Discovered Ports</h4>
@@ -318,7 +332,7 @@
             </table>
           </div>
         </div>
-      </div>
+      </div> -->
     </div>
 
 {% endblock content %}
@@ -328,10 +342,263 @@
 
   <script>
     $(document).ready(function() {
-      // Javascript method's body can be found in assets/js/demos.js
-      md.initDashboardPageCharts();
+      // Charts based on assets/js/demos.js
+      // additional reference: https://gionkunz.github.io/chartist-js/examples.html
 
-    });
+    if ($('#dailySalesChart').length != 0 ) {
+      var num_targets = "{{ targets }}";
+      var pub_domains = "{{ amass }}";
+      var subfinder_total = "{{ subfinder_total }}";
+      var subfinder_active = "{{ subfinder_active }}";
+      var internal_total = "{{ internal_total }}"
+
+      dataDailySalesChart = {
+        labels: ['external', 'domains', 'internal'],
+        // note how series is laid out; one row one entry each for label
+        // each additional row adds entry for the label
+        series: [
+          [{meta: 'total', value: num_targets},
+          {meta: 'total domains', value: subfinder_total},
+          {meta: 'interal', value: internal_total}],
+          [{meta: 'public', value: pub_domains},
+          {meta: 'active domains', value: subfinder_active},
+          {meta: 'interal', value: internal_total}],
+      ]
+      };
+
+      optionsDailySalesChart =  {
+          seriesBarDistance: 10,
+          axisX: {
+            offset: 60
+          },
+          axisY: {
+            offset: 80,
+            labelInterpolationFnc: function(value) {
+              return value
+            },
+            scaleMinSpace: 15
+        }
+      };
+
+      // optionsDailySalesChart = {
+      //     seriesBarDistance: 20,
+      //     reverseData: true,
+      //     horizontalBars: true,
+      //     axisY: {
+      //       offset: 70
+      //     }
+      // };
+
+      // var dailySalesChart = new Chartist.Line('#dailySalesChart', dataDailySalesChart, optionsDailySalesChart);
+      var dailySalesChart = new Chartist.Bar('#dailySalesChart', dataDailySalesChart, optionsDailySalesChart);
+
+      md.startAnimationForLineChart(dailySalesChart);
+
+      var $tooltip = $('<div class="chartooltip show white-space: pre;" id="countTooltip"></div>').appendTo($('#dailySalesChart'));
+      // console.log($tooltip);
+
+      $('#dailySalesChart').on('mouseenter', '.ct-bar', function() {
+      // $('#dailySalesChart').on('mouseenter', function (data) {
+        var seriesDesc = $(this).attr('ct:meta'),
+            value = $(this).attr('ct:value');
+            // console.log($(this));
+            // console.log(seriesDesc);
+            // console.log(value);
+
+        $tooltip.text(seriesDesc + '\n' + value);
+        $tooltip.addClass('show');
+      });
+
+
+      $('#dailySalesChart').on('mouseleave', '.ct-bar', function() {
+        $tooltip.removeClass('show');
+      });
+
+      $('#dailySalesChart').on('mousemove', '.ct-bar', function(event) {
+        $tooltip.css({
+          left: event.offsetX + 5,
+          top: event.offsetY - $tooltip.height() - 10
+        });
+      });
+
+    };
+
+    if ($('#completedTasksChart').length != 0) {
+      var num_info = "{{ num_info }}"
+      var sla_info = "{{ sla_info }}"
+      var sla_low = "{{ sla_low }}"
+      var num_low = "{{ num_low }}"
+
+      var sla_values = [num_info, sla_info, sla_low, num_low]
+
+      dataCompletedTasksChart = {
+        labels: ['-30days', 'Now'],
+        series: [
+          [{meta: 'info', value: sla_info},
+            {meta: 'info', value: num_info}],
+          [{meta: 'low', value: sla_low},
+            {meta: 'low', value: num_low}],
+        ]
+      };
+
+      var max = Math.max.apply(Math, sla_values);
+
+      optionsCompletedTasksChart = {
+        lineSmooth: Chartist.Interpolation.cardinal({
+          divisor: 2
+          // tension: 0
+        }),
+        low: 0,
+        fullWidth: true,
+        high: max * 1.05,
+        scaleMinSpace: 20,
+        onlyInteger: true,
+        chartPadding: {
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: 0
+        }
+      };
+
+      var completedTasksChart = new Chartist.Line('#completedTasksChart', dataCompletedTasksChart, optionsCompletedTasksChart);
+
+      // start animation for the Completed Tasks Chart - Line Chart
+      md.startAnimationForLineChart(completedTasksChart);
+
+      // new Chartist.Line(".ct-chart", data, options).on("draw", function (data) {
+      completedTasksChart.on("draw", function (data) {
+          // We only want the tooltip to apply to the point.
+          if (data.type === "point") {
+            // What want the tooltip to display on mouseenter so we listen for that event.
+            data.element._node.addEventListener("mouseenter", (e) => {
+
+            // I'm getting the tooltip by its class name.
+            const tooltip = document.getElementsByClassName("chartist-tooltip");
+
+            // This is how we're setting the position of the tooltip.
+            // This will set the top of the tool tip.
+            tooltip[0].style.top = data.y - 50 + "px";
+
+            // This will set the left of the tooltip. What this does is if you're on the
+            // right side of the card the tooltip display left of the cursor, if you're on
+            // the left side of the card the tooltip displays right of the cursor.
+            tooltip[0].style.left =
+              data.x > 200 ? data.x - 100 + "px" : data.x + "px";
+
+            // Here we're removing the hidden class so that the tooltip will display.
+            tooltip[0].classList.remove("hidden");
+
+            // This gets the tooltip meta div.
+            const meta = document.getElementsByClassName(
+              "chartist-tooltip-meta"
+            );
+
+            // This sets the data for the meta information on the tooltip
+            meta[0].innerHTML = data.meta;
+
+            // This gets the tooltip value div.
+            const value = document.getElementsByClassName(
+              "chartist-tooltip-value"
+            );
+
+            // This sets the data for the value.
+            value[0].innerHTML =
+              data.value.y === 1
+              // ? data.value.y + " view"
+              // : data.value.y + " views";
+              ? data.value.y
+              : data.value.y;
+        });
+      }
+        // here we're listening for when the mouse leaves, and when it does
+        // we add the class hidden to hide the tooltip.
+        data.element._node.addEventListener("mouseleave", (e) => {
+          // data.element._node.addEventListener('mouseout', (e) => {
+            const tooltip = document.getElementsByClassName("chartist-tooltip");
+            tooltip[0].classList.add("hidden");
+          });
+      });
+    };
+
+    if ($('#websiteViewsChart').length != 0) {
+      var num_critical = "{{ num_critical }}"
+      var num_high = "{{ num_high }}"
+      var num_medim = "{{ num_medim }}"
+      var num_low = "{{ num_low }}"
+      var num_info = "{{ num_info }}"
+
+      var sla_values = [num_critical, num_high, num_medim, num_low, num_info];
+
+      var dataWebsiteViewsChart = {
+        labels: ['Critical', 'High', 'Medium', 'Low', 'Info'],
+        series: [
+            [{meta: 'critical', value: num_critical},
+            {meta: 'high', value: num_high},
+            {meta: 'medium', value: num_medim},
+            {meta: 'low', value: num_low},
+            {meta: 'info', value: num_info}]
+          ],
+      };
+
+      var max = Math.max.apply(Math, sla_values);
+
+
+      var optionsWebsiteViewsChart = {
+        axisX: {
+          showGrid: false
+        },
+        low: 0,
+        high: max * 1.05,
+        scaleMinSpace: (max) / 10,
+        onlyInteger: true,
+        chartPadding: {
+          top: 0,
+          right: 5,
+          bottom: 0,
+          left: 0
+        }
+      };
+      var responsiveOptions = [
+        ['screen and (max-width: 640px)', {
+          seriesBarDistance: 5,
+          axisX: {
+            labelInterpolationFnc: function(value) {
+              return value[0];
+            }
+          }
+        }]
+      ];
+      var websiteViewsChart = Chartist.Bar('#websiteViewsChart', dataWebsiteViewsChart, optionsWebsiteViewsChart, responsiveOptions);
+
+      md.startAnimationForBarChart(websiteViewsChart);
+
+      var $totalTooltip = $('<div class="chartooltip show white-space: pre;" id="totalTooltip"></div>').appendTo($('#websiteViewsChart'));
+      // console.log($totalTooltip)
+
+      $('#websiteViewsChart').on('mouseenter', '.ct-bar', function() {
+        var seriesDesc = $(this).attr('ct:meta'),
+            value = $(this).attr('ct:value');
+
+        // console.log(value)
+
+        $totalTooltip.text(seriesDesc + '\n' + value);
+        $totalTooltip.addClass('show');
+      });
+
+      $('#websiteViewsChart').on('mouseleave', '.ct-bar', function() {
+        $totalTooltip.removeClass('show');
+      });
+
+      $('#websiteViewsChart').on('mousemove', '.ct-bar', function(event) {
+        $totalTooltip.css({
+          left: event.offsetX + 5,
+          top: event.offsetY - $tooltip.height() - 10
+        });
+      });
+    }
+    }
+    );
   </script>
 
 {% endblock javascripts %}

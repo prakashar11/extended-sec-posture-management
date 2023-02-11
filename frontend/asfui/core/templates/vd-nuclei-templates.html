@@ -187,8 +187,10 @@ Save Your Search:
                             {% if file_content.file == item.template %}
                             <tr>
                               <td colspan=4 id="filecontent-{{ item.template }}" style="text-align: left;">
-                                <pre style="white-space: pre-wrap;">
-                                  {{ file_content | linebreaks }}
+                                <!-- <pre style="white-space: pre-wrap;"> -->
+                                <!-- <pre style='font-size:1.0rem;'> -->
+                                  <pre style="font-size:1.0rem; border: 1px solid #fcc; background-color: #ccc;margin: 0;line-height: 125%;width: auto ">
+                                  <p>{{ file_content.content | linebreaks | pprint }}</p>
                               </pre>
                               </td>
                             </tr>

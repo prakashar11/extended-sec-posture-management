@@ -5664,6 +5664,42 @@ button.close {
   opacity: 0;
 }
 
+.chartooltip {
+  position: relative;
+  z-index: 1070;
+  /* z-index: 1; */
+  display: block;
+  margin: 0;
+  /* border: 1px solid #cacaca; */
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: center;
+  text-align: start;
+  text-decoration: none;
+  text-shadow: none;
+  text-transform: none;
+  letter-spacing: normal;
+  word-break: normal;
+  word-spacing: normal;
+  /* white-space: normal; */
+  line-break: auto;
+  font-size: 0.875rem;
+  word-wrap: break-word;
+  opacity: 0;
+  transition: opacity .2s ease-out;
+  white-space: pre;
+}
+
+.chartooltip.show {
+  opacity: 0.9;
+}
+
+/* .tooltip.tooltip-hidden {
+  opacity: 0;
+} */
+
 .tooltip.show {
   opacity: 0.9;
 }
