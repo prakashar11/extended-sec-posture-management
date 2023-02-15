@@ -4,7 +4,7 @@
 
 For organizations tracking cost-to-attack as a security metric, it is critical to make sure different digital assets are continuously assessed to make sure the known exploits for vulnerabilities are addressed before a threat actor takes advantage of the same. In order to do that combining internal & external attack surface monitoring with automated assessment tools, can be helpful. New acronym coined by the security vendor industry for the same is, XSPM!
 
-This repo forked from https://github.com/vmware-labs/attack-surface-framework and has made improvements for streamlined usage by organizations who are short staffed in InfoSec team or don't have a dedicated InfoSec team members.
+This repo forked from https://github.com/vmware-labs/attack-surface-framework and has made improvements for streamlined usage by organizations who are short staffed in InfoSec team or don't have dedicated InfoSec team members.
 
 Roadmap: https://github.com/users/prakashar11/projects/1
 
