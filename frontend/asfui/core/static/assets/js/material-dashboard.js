@@ -335,7 +335,7 @@ md = {
 
       var dailySalesChart = new Chartist.Line('#dailySalesChart', dataDailySalesChart, optionsDailySalesChart);
 
-      md.startAnimationForLineChart(dailySalesChart);
+      // md.startAnimationForLineChart(dailySalesChart);
 
 
 
@@ -365,7 +365,7 @@ md = {
       var completedTasksChart = new Chartist.Line('#completedTasksChart', dataCompletedTasksChart, optionsCompletedTasksChart);
 
       // start animation for the Completed Tasks Chart - Line Chart
-      md.startAnimationForLineChart(completedTasksChart);
+      // md.startAnimationForLineChart(completedTasksChart);
 
 
       /* ----------==========     Emails Subscription Chart initialization    ==========---------- */
@@ -403,7 +403,7 @@ md = {
       var websiteViewsChart = Chartist.Bar('#websiteViewsChart', dataWebsiteViewsChart, optionsWebsiteViewsChart, responsiveOptions);
 
       //start animation for the Emails Subscription Chart
-      md.startAnimationForBarChart(websiteViewsChart);
+      // md.startAnimationForBarChart(websiteViewsChart);
     }
   },
 

@@ -17195,6 +17195,13 @@ label {
   color: rgba(255, 255, 255, 0.7);
 }
 
+.ct-label {
+  /* color: red; */
+  /* font-size: 15px; */
+  /* font-size: 1em; */
+  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+}
+
 .card [class*="card-header-"] .ct-chart .ct-grid {
   stroke: rgba(255, 255, 255, 0.2);
 }

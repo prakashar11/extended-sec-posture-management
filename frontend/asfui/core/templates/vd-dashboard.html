@@ -369,7 +369,8 @@
       optionsDailySalesChart =  {
           seriesBarDistance: 10,
           axisX: {
-            offset: 60
+            offset: 80,
+            showGrid: true,
           },
           axisY: {
             offset: 80,
@@ -448,11 +449,17 @@
           divisor: 2
           // tension: 0
         }),
-        low: 0,
-        fullWidth: true,
-        high: max * 1.05,
-        scaleMinSpace: 20,
-        onlyInteger: true,
+        axisX: {
+            offset: 80,
+            showGrid: true,
+          },
+        axisY: {
+          low: 0,
+          fullWidth: true,
+          high: max * 1.05,
+          scaleMinSpace: 20,
+          onlyInteger: true,
+        },
         chartPadding: {
           top: 0,
           right: 0,
@@ -546,9 +553,11 @@
 
       var optionsWebsiteViewsChart = {
         axisX: {
-          showGrid: false
+          showGrid: true,
+          offset: 80
         },
         low: 0,
+        showGrid: true,
         high: max * 1.05,
         scaleMinSpace: (max) / 10,
         onlyInteger: true,
