@@ -9,6 +9,7 @@ from django.core.files.storage import FileSystemStorage
 from django.core.management import call_command
 from datetime import date, datetime, timedelta
 import time
+import ast
 
 from .models import vdTarget, vdInTarget, vdResult, vdServices, vdInServices, vdRegExp, vdJob, vdNucleiResult, vdNucleiTemplate
 
@@ -20,7 +21,8 @@ import os
 import re
 import csv
 import shutil
-import json, yaml
+import json
+import ruamel.yaml
 import hashlib
 from app.tools import *
 from app.search import *
@@ -101,10 +103,13 @@ def nuclei(request):
     if 'page' in request.POST:
         # page = int(request.POST['page'])
         page_payload = request.POST['page']
+        logger.debug(f"page_payload {page_payload}")
         page = int(page_payload.split(',')[0])
         severity_search = page_payload.split(',')[1]
         status_search = page_payload.split(',')[2]
-        logger.debug(f"page handling value page:{page}, severity:{severity_search}, status:{status_search}")
+        to_date = page_payload.split(',')[3]
+        from_date = page_payload.split(',')[4]
+        logger.debug(f"page handling value page:{page}, severity:{severity_search}, status:{status_search}, to_date: {to_date}, from_date: {from_date}")
         if severity_search and status_search:
             context['query_results'] = vdNucleiResult.objects.filter(level=severity_search, status=status_search)
         elif severity_search and not status_search:
@@ -113,6 +118,24 @@ def nuclei(request):
             context['query_results'] = vdNucleiResult.objects.filter(status=status_search)
         else:
             context['query_results'] = vdNucleiResult.objects.all()
+        if to_date and from_date:
+            context['to_date'] = to_date
+            context['from_date'] = from_date
+            tz = timezone.get_current_timezone()
+            enddate = datetime.strptime(to_date, '%m-%d-%Y').replace(tzinfo=tz)
+            startdate = datetime.strptime(from_date, '%m-%d-%Y').replace(tzinfo=tz)
+            # working around Django model time range search
+            s_date = (startdate - timedelta(days=1)).replace(tzinfo=tz)
+            e_date = (enddate + timedelta(days=1)).replace(tzinfo=tz)
+            result = context['query_results']
+            if enddate == startdate:
+                # NOTE: firstdate is only updated at the time of creating finding
+                # detection date and bump date are updated if finding already exists
+                # TODO: why need for detection date and bump date?
+                context['query_results'] = result.filter(firstdate__range=[s_date, e_date])
+                # context['query_results'] = result.filter(firstdate__gt=startdate, firstdate__lt=enddate)
+            else:
+                context['query_results'] = result.filter(firstdate__range=[startdate, e_date])
         context['query_count'] = context['query_results'].count()
         context['severity_search'] = severity_search
         context['status_search'] = status_search
@@ -136,13 +159,15 @@ def nuclei(request):
     #     #context['query_count'] = len(context['query_results'])
     #     slicer = pager(context, page, page_size, context['query_count'])
     #     context['query_results'] = context['query_results'][slicer]
-    if 'severity_search' in request.POST or 'status_search' in request.POST or 'text_search' in request.POST:
+    if 'severity_search' in request.POST or 'status_search' in request.POST or 'text_search' in request.POST or 'from_date' in request.POST or 'to_date' in request.POST:
         logger.debug(f"search POST {request.POST}")
         status_search = request.POST['status_search']
         severity_search = request.POST['severity_search']
         text_search = request.POST['text_search']
         # logger.debug(f"severity_search value {severity_search}")
         # logger.debug(f"status_search value {status_search}")
+        to_date = request.POST['to_date']
+        from_date = request.POST['from_date']
         if severity_search and status_search and text_search:
             # context['query_results'] = vdNucleiResult.objects.filter(level=severity_search, status=status_search)
             partial = vdNucleiResult.objects.filter(level=severity_search, status=status_search, name__regex=text_search)
@@ -172,6 +197,25 @@ def nuclei(request):
             context['query_results'] = vdNucleiResult.objects.filter(level=severity_search, status=status_search)
         else:
             context['query_results'] = vdNucleiResult.objects.all()
+        if to_date and from_date:
+            context['to_date'] = to_date
+            context['from_date'] = from_date
+            tz = timezone.get_current_timezone()
+            enddate = datetime.strptime(to_date, '%m-%d-%Y').replace(tzinfo=tz)
+            startdate = datetime.strptime(from_date, '%m-%d-%Y').replace(tzinfo=tz)
+            # working around Django model time range search
+            s_date = (startdate - timedelta(days=1)).replace(tzinfo=tz)
+            e_date = (enddate + timedelta(days=1)).replace(tzinfo=tz)
+            result = context['query_results']
+            if enddate == startdate:
+                # NOTE: firstdate is only updated at the time of creating finding
+                # detection date and bump date are updated if finding already exists
+                # TODO: why need for detection date and bump date?
+                context['query_results'] = result.filter(firstdate__range=[s_date, e_date])
+                # context['query_results'] = result.filter(firstdate__gt=startdate, firstdate__lt=enddate)
+            else:
+                context['query_results'] = result.filter(firstdate__range=[startdate, e_date])
+                # context['query_results'] = result.filter(firstdate__gte=startdate, firstdate__lte=enddate)
         context['query_count'] = context['query_results'].count()
         context['severity_search'] = severity_search
         context['status_search'] = status_search
@@ -219,7 +263,10 @@ def nucleitemplates(request):
                 filename = str(path)
                 nucleifn=filename.replace(folder, "")
                 with open(filename) as f:                    
-                    data = yaml.safe_load(f)
+                    # data = yaml.safe_load(f)
+                    yaml = ruamel.yaml.YAML(typ='safe')
+                    data = yaml.load(f)
+                    # json_data = json.dumps(data)
                     # data = f.readlines()
                 try:
                     # assume it is a new entry
@@ -298,7 +345,9 @@ def nucleitemplates(request):
             # file_content_read = nuclei_get_template_file()
             file_content_read = vdNucleiTemplate.objects.filter(template=request.POST['template_file'])[0].info
     if file_content_read:
-        context['file_content'] = {'file': request.POST['template_file'], 'content': file_content_read}
+        file_dict = ast.literal_eval(file_content_read) # to make sure string converts to dict
+        output = json.dumps(file_dict)
+        context['file_content'] = {'file': request.POST['template_file'], 'content': output}
 
     page = 0
     page_size = GENERAL_PAGE_SIZE

@@ -24,7 +24,7 @@
     {%csrf_token%}
  <input type="hidden" name="nuclei_action" value="refresh">
  <button type="submit" class="btn btn-white btn-round btn-just-icon"  rel="tooltip" title="Reresh Nuclei templates data" data-original-title="Reresh Nuclei templates">
-   <i class="material-icons">refresh status</i>
+   <i class="material-icons" style="margin-left: 9px;">refresh status</i>
    <div class="ripple-container"></div>
  </button>
  </form>
@@ -189,9 +189,12 @@ Save Your Search:
                               <td colspan=4 id="filecontent-{{ item.template }}" style="text-align: left;">
                                 <!-- <pre style="white-space: pre-wrap;"> -->
                                 <!-- <pre style='font-size:1.0rem;'> -->
-                                  <pre style="font-size:1.0rem; border: 1px solid #fcc; background-color: #ccc;margin: 0;line-height: 125%;width: auto ">
-                                  <p>{{ file_content.content | linebreaks | pprint }}</p>
-                              </pre>
+                                  <!-- <pre style="font-size:1.0rem; border: 1px solid #fcc; background-color: #ccc;margin: 0;line-height: 125%;width: auto "> -->
+                                  <!-- <pre style="white-space: pre-wrap; font-family:monospace; word-break: keep-all; background-color: #EEEEEE; overflow: auto;" id="nuclei_template_file"></pre> -->
+                                  <pre style="outline: 1px solid #ccc; padding: 5px; margin: 5px; white-space: pre-wrap; " id="nuclei_template_file"> </pre>
+                                  <!-- <pre id="nuclei_template_file"></pre> -->
+                                  <!-- <p>{{ file_content.content | linebreaks | pprint }}</p> -->
+                              <!-- </pre> -->
                               </td>
                             </tr>
                             {% endif %}
@@ -216,6 +219,26 @@ Save Your Search:
 {% block javascripts %}
 
 <script>
+
+  // JSON verify http://json.parser.online.fr/
+  // JSON formating of the Nuclei templates
+
+  var obj = JSON.stringify("{{ file_content.content }}", undefined, 4)
+  var removeFirstAndLast = obj.substring(1,obj.length-1)
+  // console.log(removeFirstAndLast);
+  var removeDoubleQuotes = removeFirstAndLast.replace(/""/gi, `"`).replace(/&quot;/g,'"')
+  // console.log(removeDoubleQuotes);
+  try {
+    var output = JSON.parse(removeDoubleQuotes);
+    // console.log(output);
+    output = JSON.stringify(output, null, 2);
+  } catch (objError) {
+    output = removeDoubleQuotes
+  }
+
+  // document.getElementById("nuclei_template_file").innerHTML = output
+  document.getElementById("nuclei_template_file").innerText = output
+
 
   function scroll_position() {
       // console.log("form submit")

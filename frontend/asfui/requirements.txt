@@ -15,3 +15,4 @@ netaddr
 pymetasploit3
 psutil
 pyyaml
+ruamel.yaml
