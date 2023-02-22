@@ -496,22 +496,32 @@
   $(function () {
       $('#datetimepicker6').datetimepicker({
         format: 'MM-DD-YYYY',
-        // icons: {
-        //     time: "fa fa-clock-o",
-        //     date: "fa fa-calendar",
-        //     up: "fa fa-arrow-up",
-        //     down: "fa fa-arrow-down"
-        // }
+        icons: {
+          time: "fa fa-clock-o",
+          date: "fa fa-calendar",
+          up: "fa fa-chevron-up",
+          down: "fa fa-chevron-down",
+          previous: 'fa fa-chevron-left',
+          next: 'fa fa-chevron-right',
+          today: 'fa fa-screenshot',
+          clear: 'fa fa-trash',
+          close: 'fa fa-remove'
+        }
       });
       $('#datetimepicker7').datetimepicker({
           useCurrent: false, //Important! See issue #1075
           format: 'MM-DD-YYYY',
-          // icons: {
-          //     time: "fa fa-clock-o",
-          //     date: "fa fa-calendar",
-          //     up: "fa fa-arrow-up",
-          //     down: "fa fa-arrow-down"
-          // }
+          icons: {
+            time: "fa fa-clock-o",
+            date: "fa fa-calendar",
+            up: "fa fa-chevron-up",
+            down: "fa fa-chevron-down",
+            previous: 'fa fa-chevron-left',
+            next: 'fa fa-chevron-right',
+            today: 'fa fa-screenshot',
+            clear: 'fa fa-trash',
+            close: 'fa fa-remove'
+        }
   });
       $("#datetimepicker6").on("dp.change", function (e) {
           $('#datetimepicker7').data("DateTimePicker").minDate(e.date);
